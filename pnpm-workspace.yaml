@@ -1,0 +1,10 @@
+packages:
+  - 'apps/*'
+
+overrides:
+  expo-constants: 56.0.19
+
+allowBuilds:
+  '@nestjs/core': true
+  esbuild: true
+  unrs-resolver: true

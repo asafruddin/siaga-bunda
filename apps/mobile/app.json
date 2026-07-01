@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "SiAGA Bunda",
+    "slug": "siaga-bunda",
+    "version": "0.1.0",
+    "scheme": "siagabunda",
+    "orientation": "default",
+    "userInterfaceStyle": "light",
+    "updates": {
+      "enabled": false
+    },
+    "android": {
+      "package": "id.siagabunda.app",
+      "versionCode": 1,
+      "permissions": [],
+      "predictiveBackGestureEnabled": false
+    },
+    "androidStatusBar": {
+      "backgroundColor": "#FFF8F5",
+      "barStyle": "dark-content"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FFF8F5"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 36,
+            "targetSdkVersion": 36,
+            "minSdkVersion": 26
+          }
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
