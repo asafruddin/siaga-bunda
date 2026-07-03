@@ -28,9 +28,8 @@ The application is not only an educational app, but also a controlled research t
 3. Complete pretest before each video.
 4. Watch the video fully without skipping.
 5. Wait 7 days for posttest availability.
-6. Receive reminder notification.
-7. Complete posttest.
-8. Unlock the next video.
+6. Complete posttest from the dashboard.
+7. Unlock the next video.
 
 Researchers can access a mobile researcher view to monitor respondents, video progress, pretest results, posttest results, and export study data.
 
@@ -72,6 +71,7 @@ The MVP will not include:
 - Complex CMS for video/question management.
 - Multi-language support.
 - Public landing page.
+- Push notifications for posttest reminders.
 
 ---
 
@@ -87,8 +87,7 @@ Respondent can:
 - View dashboard.
 - Complete pretest.
 - Watch education video.
-- Receive posttest reminder.
-- Complete posttest.
+- Complete posttest from the dashboard.
 - View learning progress.
 - Access unlocked videos.
 
@@ -151,7 +150,6 @@ Recommended backend characteristics:
 - REST API
 - Supabase client integration
 - JWT-based authentication or Supabase Auth integration
-- Background scheduling strategy for posttest reminders
 
 ## 6.3 Database
 
@@ -186,7 +184,7 @@ Supabase will store:
 8. User completes pretest.
 9. User watches video until 100%.
 10. System schedules posttest for 7 days later.
-11. User receives posttest reminder.
+11. User opens dashboard when posttest is available.
 12. User completes posttest.
 13. System unlocks Video 2.
 14. Flow repeats until Video 7 is completed.
@@ -388,23 +386,6 @@ Acceptance criteria:
 - Dashboard shows waiting state.
 - Dashboard shows posttest available date.
 - Next video remains locked.
-
----
-
-### F-008: Reminder Notification
-
-The system must remind user when posttest is available.
-
-Notification message example:
-
-“Ibu, saatnya mengisi posttest Video 1.”
-
-Acceptance criteria:
-
-- Notification is scheduled after video completion.
-- Notification is sent when posttest becomes available.
-- Dashboard also shows posttest availability.
-- User can open posttest from dashboard even if notification is missed.
 
 ---
 
@@ -818,7 +799,6 @@ Recommended stack:
 - TanStack Query for server state.
 - Zustand for local app state when needed.
 - Expo AV or Expo video package for video playback.
-- Expo Notifications for push notifications.
 - AsyncStorage or SecureStore for local token/session handling.
 - NativeWind or StyleSheet-based design system.
 
@@ -836,7 +816,6 @@ Recommended stack:
 - Zod for request validation.
 - JWT/session validation.
 - CSV export generator.
-- Scheduled job endpoint for reminders.
 
 ---
 
@@ -903,11 +882,9 @@ siaga-bunda/
           videos/
           tests/
           researcher/
-          notifications/
         services/
           api-client.ts
           auth-service.ts
-          notification-service.ts
         hooks/
         stores/
         utils/
@@ -947,8 +924,6 @@ siaga-bunda/
           posttest-results.ts
           comparison.ts
           export.ts
-        jobs/
-          send-posttest-reminders.ts
       src/
         lib/
           supabase.ts
@@ -960,7 +935,6 @@ siaga-bunda/
           videos/
           tests/
           researcher/
-          notifications/
           exports/
         validators/
         types/
@@ -1127,7 +1101,6 @@ src/modules/respondents/
 src/modules/videos/
 src/modules/tests/
 src/modules/researcher/
-src/modules/notifications/
 ```
 
 Each module can include:
@@ -1313,29 +1286,15 @@ Fields:
 - respondent_id UUID foreign key
 - video_id UUID foreign key
 - available_at timestamp
-- reminder_sent_at timestamp nullable
 - status text: scheduled / available / completed
 - created_at timestamp
 - updated_at timestamp
 
 ---
 
-## 16.9 notifications
+## 16.9 Legacy tables
 
-Stores notification history.
-
-Fields:
-
-- id UUID primary key
-- user_id UUID foreign key
-- title text
-- message text
-- type text
-- scheduled_at timestamp
-- sent_at timestamp nullable
-- read_at timestamp nullable
-- status text
-- created_at timestamp
+The initial schema includes unused `notifications` and `respondents.expo_push_token` columns from an earlier push-notification design. The MVP promotes posttest availability through dashboard requests only.
 
 ---
 
@@ -1618,50 +1577,6 @@ Request:
 
 ---
 
-## Jobs
-
-### POST /api/jobs/send-posttest-reminders
-
-Scheduled endpoint for sending posttest reminders.
-
-Backend behavior:
-
-- Find schedules where available_at <= now.
-- Check reminder_sent_at is null.
-- Send notification.
-- Update reminder_sent_at.
-- Update schedule status to available.
-
-Security:
-
-- Endpoint must be protected with secret token.
-
----
-
-# 19. Notification Requirements
-
-## 19.1 Notification Types
-
-- Posttest available.
-- Optional: registration success.
-- Optional: education progress reminder.
-
-## 19.2 Posttest Reminder
-
-Trigger:
-
-- 7 days after video completion.
-
-Message:
-
-“Ibu, saatnya mengisi posttest Video [number].”
-
-Fallback:
-
-- Dashboard must show posttest availability even if notification fails.
-
----
-
 # 20. Video Tracking Requirements
 
 ## 20.1 Progress Checkpoint
@@ -1758,8 +1673,6 @@ SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 SUPABASE_ANON_KEY=
 JWT_SECRET=
-JOB_SECRET=
-EXPO_ACCESS_TOKEN=
 ```
 
 Important:
@@ -2013,15 +1926,14 @@ Acceptance criteria:
 
 ## Epic 7: Posttest
 
-### Story 7.1: Receive Posttest Reminder
+### Story 7.1: Open Posttest from Dashboard
 
-As a respondent, I want to be reminded when posttest is available.
+As a respondent, I want to see and open posttest when it becomes available.
 
 Acceptance criteria:
 
-- Notification is sent after 7 days.
-- Dashboard shows posttest available state.
-- User can open posttest.
+- Dashboard shows posttest available state after the scheduled date.
+- User can open posttest from the dashboard.
 
 ---
 

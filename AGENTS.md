@@ -61,13 +61,13 @@ siaga-bunda/
         lib.ts                   # db(), auth, researcher, ok/fail, row, audit, issueToken
         dev.ts                   # local node server + .env loader
       tests/                     # vitest
-      vercel.json                # rewrites + cron for posttest reminders
+      vercel.json                # API rewrites for Vercel deployment
     mobile/                      # Expo app
       app/                       # Expo Router routes (THIN — re-export only)
       src/
         components/ui.tsx        # shared UI primitives (Screen, Button, Field, ...)
         features/<feature>/      # feature modules (see §5)
-        services/                # api.ts, session.ts, notifications.ts
+        services/                # api.ts, session.ts
         theme.ts                 # color tokens
   packages/
     shared/src/index.ts          # zod schemas, types, pregnancy calculations
@@ -246,8 +246,7 @@ await put('/respondents/me', patch); // PUT
 - The Supabase **service-role key lives only in the API/Vercel environment**. It must
   never appear in the mobile app or any `EXPO_PUBLIC_*` variable.
 - Mobile only ever holds the app JWT (in SecureStore) and public anon values.
-- `JWT_SECRET` and `JOB_SECRET` must be strong and environment-specific. The cron job
-  endpoint (`/jobs/send-posttest-reminders`) authenticates with `X-Job-Secret`.
+- `JWT_SECRET` must be strong and environment-specific.
 - Researcher exports use anonymized `respondent_code` (hashed) — never export direct
   identifiers.
 - Enforce authorization on the server. Do not rely on hiding UI as a security measure.
@@ -267,11 +266,10 @@ await put('/respondents/me', patch); // PUT
 ## 10. Environment variables
 
 - API (`apps/api/.env.local`): `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
-  `SUPABASE_ANON_KEY`, `JWT_SECRET`, `JOB_SECRET`, `EXPO_ACCESS_TOKEN`,
-  `POSTTEST_DELAY_DAYS`, `ALLOWED_ORIGINS`.
+  `SUPABASE_ANON_KEY`, `JWT_SECRET`, `POSTTEST_DELAY_DAYS`, `ALLOWED_ORIGINS`.
 - Mobile (`apps/mobile/.env.local`): `EXPO_PUBLIC_API_BASE_URL`,
-  `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`,
-  `EXPO_PUBLIC_EAS_PROJECT_ID`. Only `EXPO_PUBLIC_*` values are safe on the client.
+  `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`. Only `EXPO_PUBLIC_*`
+  values are safe on the client.
 - `.env.local` is gitignored. Never commit real secrets. Never print secrets in output.
 
 ---
@@ -322,7 +320,7 @@ Supabase SQL editor.
   (`vitest`). Add tests for new shared functions and critical API behavior.
 - High-risk manual scenarios (verify before release): forward-seek attempts, app
   background/resume during playback, duplicate test submission, early posttest access,
-  role escalation, expired JWT, failed push delivery, pagination, export anonymization.
+  role escalation, expired JWT, pagination, export anonymization.
 - For the 7-day flow, set `POSTTEST_DELAY_DAYS=0` **only** in a disposable environment.
 
 ---

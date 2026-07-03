@@ -11,7 +11,7 @@ Monorepo MVP for pregnancy danger-sign education and controlled research monitor
 
 ## Setup
 
-Requirements: Node.js 22.13+, pnpm 10, a Supabase project, and (for push notifications) an Expo/EAS project.
+Requirements: Node.js 22.13+, pnpm 10, and a Supabase project.
 
 1. Install packages: `pnpm install`.
 2. Apply `supabase/migrations/202607030001_initial_schema.sql`, then `supabase/seed.sql` in Supabase.
@@ -37,8 +37,7 @@ Run `pnpm typecheck` and `pnpm test`. API responses follow `{ success, data }` o
 
 ## Production checklist
 
-- Replace development JWT/job secrets and seeded video URLs.
-- Configure the Vercel variables and cron authorization.
-- Configure EAS project ID and Expo access token for push delivery.
+- Replace development JWT secrets and seeded video URLs.
+- Configure the Vercel environment variables for the API.
 - Review retention/deletion policy and researcher access before collecting real health data.
-- Test the native splash and notification flow in release builds.
+- Test the native splash flow in release builds.

@@ -72,13 +72,11 @@ export async function audit(
   entityId?: string,
   metadata: unknown = {},
 ) {
-  await db()
-    .from('audit_logs')
-    .insert({
-      action,
-      user_id: userId,
-      respondent_id: respondentId,
-      entity_id: entityId,
-      metadata,
-    });
+  await db().from('audit_logs').insert({
+    action,
+    user_id: userId,
+    respondent_id: respondentId,
+    entity_id: entityId,
+    metadata,
+  });
 }

@@ -6,7 +6,6 @@ import { Button, Field, Screen, Title, ui } from '@/components/ui';
 import { useRegistration } from '@/features/registration/store';
 import { post } from '@/services/api';
 import { useSession } from '@/services/session';
-import { getPushToken } from '@/services/notifications';
 export default function Step3() {
   const d = useRegistration();
   const [support, setSupport] = useState(d.husbandSupport ?? true);
@@ -18,13 +17,11 @@ export default function Step3() {
   async function submit() {
     try {
       setBusy(true);
-      const expoPushToken = await getPushToken().catch(() => undefined);
       const payload = {
         ...d,
         husbandSupport: support,
         pregnancyComplicationHistory: complication,
         consentAccepted: consent,
-        expoPushToken,
       };
       const parsed = registrationSchema.safeParse(payload);
       if (!parsed.success)

@@ -2,7 +2,7 @@
 
 Base path: `/api`. Every JSON success is `{ "success": true, "data": ... }`; every error is `{ "success": false, "error": { "code", "message" } }`.
 
-Authenticated endpoints use `Authorization: Bearer <jwt>`. Researcher endpoints additionally validate the researcher role. `POST /jobs/send-posttest-reminders` uses `X-Job-Secret` or a bearer job secret.
+Authenticated endpoints use `Authorization: Bearer <jwt>`. Researcher endpoints additionally validate the researcher role.
 
 Implemented endpoints:
 
@@ -16,4 +16,3 @@ Implemented endpoints:
 - `GET /researcher/overview|respondents|respondents/:id|videos/monitoring`
 - `GET /researcher/results/pretest|posttest|comparison`
 - `POST /researcher/export`
-- `POST /jobs/send-posttest-reminders`

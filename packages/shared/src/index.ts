@@ -79,7 +79,6 @@ export const registrationSchema = z.object({
   husbandSupport: z.boolean(),
   pregnancyComplicationHistory: z.string(),
   consentAccepted: z.literal(true),
-  expoPushToken: z.string().optional(),
 });
 
 export type RegistrationInput = z.infer<typeof registrationSchema>;

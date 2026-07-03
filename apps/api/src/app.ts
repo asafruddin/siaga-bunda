@@ -32,7 +32,7 @@ app.use(
       (process.env.ALLOWED_ORIGINS ?? '').split(',').includes(origin)
         ? origin
         : '',
-    allowHeaders: ['Authorization', 'Content-Type', 'X-Job-Secret'],
+    allowHeaders: ['Authorization', 'Content-Type'],
   }),
 );
 app.onError((error, c) => {
@@ -147,7 +147,6 @@ app.post('/respondents/register', async (c) => {
         pregnancy_complication_history: input.pregnancyComplicationHistory,
         consent_accepted: true,
         consent_accepted_at: new Date().toISOString(),
-        expo_push_token: input.expoPushToken,
       })
       .select('*')
       .single(),
@@ -162,13 +161,11 @@ app.post('/respondents/register', async (c) => {
       .single(),
   ) as any;
   if (first)
-    await client
-      .from('video_progress')
-      .insert({
-        respondent_id: respondent.id,
-        video_id: first.id,
-        status: 'pretest_required',
-      });
+    await client.from('video_progress').insert({
+      respondent_id: respondent.id,
+      video_id: first.id,
+      status: 'pretest_required',
+    });
   await audit('respondent_registered', user.id, respondent.id, respondent.id);
   return ok(
     c,
@@ -196,7 +193,7 @@ app.get('/respondents/me', auth, async (c) => {
   );
 });
 app.put('/respondents/me', auth, async (c) => {
-  const allowed = ['address', 'occupation', 'expo_push_token'];
+  const allowed = ['address', 'occupation'];
   const body = await c.req.json();
   const patch = Object.fromEntries(
     Object.entries(body).filter(([key]) => allowed.includes(key)),
@@ -458,17 +455,15 @@ app.post('/videos/:id/complete', auth, async (c) => {
       .select('*')
       .single(),
   );
-  await client
-    .from('posttest_schedules')
-    .upsert(
-      {
-        respondent_id: respondent.id,
-        video_id: video.id,
-        available_at: available,
-        status: 'scheduled',
-      },
-      { onConflict: 'respondent_id,video_id' },
-    );
+  await client.from('posttest_schedules').upsert(
+    {
+      respondent_id: respondent.id,
+      video_id: video.id,
+      available_at: available,
+      status: 'scheduled',
+    },
+    { onConflict: 'respondent_id,video_id' },
+  );
   await audit('video_completed', c.get('user').id, respondent.id, video.id);
   await audit('posttest_scheduled', c.get('user').id, respondent.id, video.id, {
     availableAt: available,
@@ -574,18 +569,16 @@ async function submitTest(c: any, type: 'pretest' | 'posttest') {
       .select('*')
       .single(),
   ) as any;
-  await client
-    .from('test_answers')
-    .insert(
-      parsed.data.answers.map((a) => ({
-        test_attempt_id: attempt.id,
-        question_id: a.questionId,
-        selected_answer: a.selectedAnswer,
-        is_correct:
-          questions.find((q) => q.id === a.questionId)?.correct_answer ===
-          a.selectedAnswer,
-      })),
-    );
+  await client.from('test_answers').insert(
+    parsed.data.answers.map((a) => ({
+      test_attempt_id: attempt.id,
+      question_id: a.questionId,
+      selected_answer: a.selectedAnswer,
+      is_correct:
+        questions.find((q) => q.id === a.questionId)?.correct_answer ===
+        a.selectedAnswer,
+    })),
+  );
   if (type === 'pretest')
     await client
       .from('video_progress')
@@ -617,16 +610,14 @@ async function submitTest(c: any, type: 'pretest' | 'posttest') {
         .maybeSingle(),
     ) as any;
     if (next) {
-      await client
-        .from('video_progress')
-        .upsert(
-          {
-            respondent_id: respondent.id,
-            video_id: next.id,
-            status: 'pretest_required',
-          },
-          { onConflict: 'respondent_id,video_id' },
-        );
+      await client.from('video_progress').upsert(
+        {
+          respondent_id: respondent.id,
+          video_id: next.id,
+          status: 'pretest_required',
+        },
+        { onConflict: 'respondent_id,video_id' },
+      );
       await audit(
         'next_video_unlocked',
         c.get('user').id,
@@ -810,73 +801,4 @@ app.post('/researcher/export', async (c) => {
     `attachment; filename="siaga-bunda-${Date.now()}.csv"`,
   );
   return c.body(`\ufeff${csv}`);
-});
-
-app.post('/jobs/send-posttest-reminders', async (c) => {
-  const supplied =
-    c.req.header('x-job-secret') ??
-    c.req.header('authorization')?.replace('Bearer ', '');
-  if (!process.env.JOB_SECRET || supplied !== process.env.JOB_SECRET)
-    return fail(c, 'UNAUTHORIZED', 'Job secret tidak valid.', 401);
-  const schedules = row(
-    await db()
-      .from('posttest_schedules')
-      .select('*,respondents(user_id,expo_push_token),videos(sequence_number)')
-      .lte('available_at', new Date().toISOString())
-      .is('reminder_sent_at', null)
-      .neq('status', 'completed'),
-  ) as any[];
-  let sent = 0;
-  for (const schedule of schedules) {
-    const message = `Ibu, saatnya mengisi posttest Video ${schedule.videos.sequence_number}.`;
-    const notification = {
-      user_id: schedule.respondents.user_id,
-      title: 'Posttest tersedia',
-      message,
-      type: 'posttest_available',
-      scheduled_at: schedule.available_at,
-      status: schedule.respondents.expo_push_token
-        ? 'pending'
-        : 'dashboard_only',
-    };
-    if (schedule.respondents.expo_push_token) {
-      const response = await fetch('https://exp.host/--/api/v2/push/send', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(process.env.EXPO_ACCESS_TOKEN
-            ? { Authorization: `Bearer ${process.env.EXPO_ACCESS_TOKEN}` }
-            : {}),
-        },
-        body: JSON.stringify({
-          to: schedule.respondents.expo_push_token,
-          title: notification.title,
-          body: message,
-          data: { videoId: schedule.video_id, screen: 'posttest' },
-        }),
-      });
-      notification.status = response.ok ? 'sent' : 'failed';
-      if (response.ok) sent++;
-    }
-    await db()
-      .from('notifications')
-      .insert({
-        ...notification,
-        sent_at:
-          notification.status === 'sent' ? new Date().toISOString() : null,
-      });
-    await db()
-      .from('posttest_schedules')
-      .update({
-        reminder_sent_at: new Date().toISOString(),
-        status: 'available',
-      })
-      .eq('id', schedule.id);
-    await db()
-      .from('video_progress')
-      .update({ status: 'posttest_available' })
-      .eq('respondent_id', schedule.respondent_id)
-      .eq('video_id', schedule.video_id);
-  }
-  return ok(c, { processed: schedules.length, sent });
 });
