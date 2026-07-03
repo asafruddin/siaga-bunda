@@ -1,9 +1,8 @@
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { Card, Loading, Notice, Screen, Title, ui } from '@/components/ui';
+import { Button, Loading, Notice, Screen } from '@/components/ui';
 import { colors } from '@/theme';
 import { api } from '@/services/api';
-import { MetricRow } from '../components/metric-row';
 import { researcherStyles as s } from '../lib/styles';
 
 export function ComparisonScreen() {
@@ -11,49 +10,197 @@ export function ComparisonScreen() {
     queryKey: ['comparison'],
     queryFn: () => api<any[]>('/researcher/results/comparison'),
   });
+  const comparisons = q.data ?? [];
+  const valid = comparisons.filter(
+    (item) => item.improvement_percentage != null,
+  );
+  const overallImprovement = valid.length
+    ? valid.reduce(
+        (total, item) => total + Number(item.improvement_percentage),
+        0,
+      ) / valid.length
+    : null;
+
   return (
     <Screen>
-      <Title subtitle="Perbandingan responden dengan pasangan nilai tersedia.">
-        Pretest vs Posttest
-      </Title>
+      <View style={s.pageHeading}>
+        <View style={s.pageEyebrowRow}>
+          <View style={[s.pageIconBox, { backgroundColor: '#FFF0D6' }]}>
+            <Text style={s.pageIconText}>↗</Text>
+          </View>
+          <Text style={s.pageEyebrow}>DAMPAK EDUKASI</Text>
+        </View>
+        <Text style={s.pageTitle}>Perbandingan Hasil</Text>
+        <Text style={s.pageSubtitle}>
+          Bandingkan nilai sebelum dan sesudah materi diberikan.
+        </Text>
+      </View>
+
+      {!q.isLoading && !q.error && valid.length ? (
+        <View style={s.comparisonHero}>
+          <View style={s.comparisonHeroIcon}>
+            <Text style={s.comparisonHeroIconText}>
+              {Number(overallImprovement) >= 0 ? '↗' : '↘'}
+            </Text>
+          </View>
+          <View style={s.comparisonHeroCopy}>
+            <Text style={s.comparisonHeroEyebrow}>PERUBAHAN RATA-RATA</Text>
+            <Text
+              style={[
+                s.comparisonHeroValue,
+                Number(overallImprovement) < 0 && { color: '#FFD4CF' },
+              ]}
+            >
+              {Number(overallImprovement) > 0 ? '+' : ''}
+              {Number(overallImprovement).toFixed(1)}%
+            </Text>
+            <Text style={s.comparisonHeroHint}>
+              Dari {valid.length} materi dengan pasangan data lengkap
+            </Text>
+          </View>
+        </View>
+      ) : null}
+
       {q.isLoading ? (
         <Loading />
       ) : q.error ? (
-        <Notice>{q.error.message}</Notice>
+        <Notice action={<Button onPress={() => q.refetch()}>Coba lagi</Button>}>
+          {q.error.message}
+        </Notice>
+      ) : comparisons.length ? (
+        <>
+          <View style={s.listHeading}>
+            <View>
+              <Text style={s.sectionTitle}>Perbandingan per video</Text>
+              <Text style={s.sectionHint}>
+                Hanya pasangan data yang lengkap
+              </Text>
+            </View>
+          </View>
+          {comparisons.map((item) => {
+            const pretest = Number(item.average_pretest ?? 0);
+            const posttest = Number(item.average_posttest ?? 0);
+            const difference = Number(item.difference ?? posttest - pretest);
+            const hasData = item.improvement_percentage != null;
+            const improved = difference >= 0;
+            return (
+              <View key={item.video_id} style={s.comparisonCard}>
+                <View style={s.comparisonCardHeader}>
+                  <View style={s.resultVideoNumber}>
+                    <Text style={s.resultVideoNumberText}>
+                      {item.sequence_number}
+                    </Text>
+                  </View>
+                  <View style={s.resultTitleWrap}>
+                    <Text style={s.resultTitle} numberOfLines={2}>
+                      {item.title}
+                    </Text>
+                    <Text style={s.resultSubtitle}>
+                      {item.paired_respondents ?? 0} pasangan data
+                    </Text>
+                  </View>
+                  <View
+                    style={[
+                      s.changePill,
+                      !improved && { backgroundColor: '#FDE3E1' },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        s.changePillText,
+                        !improved && { color: colors.danger },
+                      ]}
+                    >
+                      {hasData
+                        ? `${difference > 0 ? '+' : ''}${difference}`
+                        : '—'}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={s.beforeAfterRow}>
+                  <ScoreComparison label="Pretest" value={pretest} tone="pre" />
+                  <View style={s.comparisonArrow}>
+                    <Text style={s.comparisonArrowText}>→</Text>
+                  </View>
+                  <ScoreComparison
+                    label="Posttest"
+                    value={posttest}
+                    tone="post"
+                  />
+                </View>
+
+                {hasData ? (
+                  <View style={s.improvementMessage}>
+                    <Text
+                      style={[
+                        s.improvementMessageIcon,
+                        !improved && { color: colors.danger },
+                      ]}
+                    >
+                      {improved ? '↗' : '↘'}
+                    </Text>
+                    <Text style={s.improvementMessageText}>
+                      {improved ? 'Peningkatan' : 'Penurunan'} sebesar{' '}
+                      <Text
+                        style={{
+                          fontWeight: '900',
+                          color: improved ? colors.success : colors.danger,
+                        }}
+                      >
+                        {Math.abs(Number(item.improvement_percentage))}%
+                      </Text>
+                    </Text>
+                  </View>
+                ) : (
+                  <Text style={s.noDataText}>
+                    Belum cukup pasangan data untuk menghitung perubahan.
+                  </Text>
+                )}
+              </View>
+            );
+          })}
+        </>
       ) : (
-        q.data?.map((v) => (
-          <Card key={v.video_id}>
-            <Text style={s.cardTitle}>
-              Video {v.sequence_number}: {v.title}
-            </Text>
-            <MetricRow
-              label="Rata-rata pretest"
-              value={v.average_pretest ?? 0}
-            />
-            <MetricRow
-              label="Rata-rata posttest"
-              value={v.average_posttest ?? 0}
-            />
-            <MetricRow label="Selisih" value={v.difference ?? 0} />
-            <Text
-              style={[
-                s.improvement,
-                {
-                  color:
-                    Number(v.improvement_percentage) >= 0
-                      ? colors.success
-                      : colors.danger,
-                },
-              ]}
-            >
-              {v.improvement_percentage == null
-                ? 'Belum cukup data'
-                : `${v.improvement_percentage}% perubahan`}
-            </Text>
-            <Text style={ui.muted}>{v.paired_respondents} pasangan data</Text>
-          </Card>
-        ))
+        <View style={s.emptyState}>
+          <View style={[s.emptyStateIcon, { backgroundColor: '#FFF0D6' }]}>
+            <Text style={s.emptyStateIconText}>↗</Text>
+          </View>
+          <Text style={s.emptyStateTitle}>Belum ada data perbandingan</Text>
+          <Text style={s.emptyStateText}>
+            Perbandingan tersedia setelah responden menyelesaikan kedua tes.
+          </Text>
+        </View>
       )}
     </Screen>
+  );
+}
+
+function ScoreComparison({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone: 'pre' | 'post';
+}) {
+  return (
+    <View
+      style={[
+        s.scoreComparison,
+        tone === 'post' && { backgroundColor: '#E8F4ED' },
+      ]}
+    >
+      <Text style={s.scoreComparisonLabel}>{label}</Text>
+      <Text
+        style={[
+          s.scoreComparisonValue,
+          tone === 'post' && { color: colors.success },
+        ]}
+      >
+        {value}
+      </Text>
+    </View>
   );
 }
