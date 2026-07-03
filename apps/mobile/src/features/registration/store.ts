@@ -1,0 +1,3 @@
+import { create } from 'zustand'; import type { RegistrationInput } from '@siaga/shared';
+type Draft=Partial<RegistrationInput>&{set(values:Partial<RegistrationInput>):void;reset():void};
+export const useRegistration=create<Draft>(set=>({set:values=>set(values),reset:()=>set({name:undefined,age:undefined,phoneNumber:undefined,address:undefined,education:undefined,occupation:undefined,hpht:undefined,hpl:undefined,pregnancyAgeWeeks:undefined,numberOfChildren:undefined,medicalHistory:undefined,birthHistory:undefined,husbandSupport:undefined,pregnancyComplicationHistory:undefined,consentAccepted:undefined})}));

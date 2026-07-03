@@ -1,0 +1,13 @@
+{
+  "name": "siaga-bunda",
+  "private": true,
+  "packageManager": "pnpm@10.12.1",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "typecheck": "turbo typecheck",
+    "lint": "turbo lint",
+    "test": "turbo test"
+  },
+  "devDependencies": { "turbo": "^2.5.6", "typescript": "^5.8.3" }
+}

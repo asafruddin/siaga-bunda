@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "SiAGA Bunda",
+    "slug": "siaga-bunda",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "siagabunda",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "id.siagabunda.mobile"
+    },
+    "android": {
+      "package": "id.siagabunda.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#FCEEF4"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "color": "#B4557D"
+        }
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-video"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {}
+  }
+}
