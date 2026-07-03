@@ -7,7 +7,13 @@
     "build": "turbo build",
     "typecheck": "turbo typecheck",
     "lint": "turbo lint",
-    "test": "turbo test"
+    "test": "turbo test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\""
   },
-  "devDependencies": { "turbo": "^2.5.6", "typescript": "^5.8.3" }
+  "devDependencies": {
+    "prettier": "^3.6.2",
+    "turbo": "^2.5.6",
+    "typescript": "^5.8.3"
+  }
 }

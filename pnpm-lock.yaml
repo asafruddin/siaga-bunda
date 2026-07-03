@@ -8,6 +8,9 @@ importers:
 
   .:
     devDependencies:
+      prettier:
+        specifier: ^3.6.2
+        version: 3.9.4
       turbo:
         specifier: ^2.5.6
         version: 2.10.2
@@ -39,6 +42,9 @@ importers:
       '@types/node':
         specifier: ^22.15.32
         version: 22.20.0
+      tsx:
+        specifier: ^4.20.3
+        version: 4.23.0
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -47,7 +53,7 @@ importers:
         version: 44.7.3(rollup@4.62.2)
       vitest:
         specifier: ^3.2.4
-        version: 3.2.6(@edge-runtime/vm@3.2.0)(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(yaml@2.9.0)
+        version: 3.2.6(@edge-runtime/vm@3.2.0)(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0)
 
   apps/mobile:
     dependencies:
@@ -126,7 +132,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.6(@edge-runtime/vm@3.2.0)(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(yaml@2.9.0)
+        version: 3.2.6(@edge-runtime/vm@3.2.0)(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0)
 
   packages/shared:
     dependencies:
@@ -139,7 +145,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.6(@edge-runtime/vm@3.2.0)(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(yaml@2.9.0)
+        version: 3.2.6(@edge-runtime/vm@3.2.0)(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0)
 
 packages:
 
@@ -3342,6 +3348,11 @@ packages:
     resolution: {integrity: sha512-vuwillviilfKZsg0VGj5R/YwwcHx4SLsIOI/7K6mQkWx+l5cUHTjj5g0AasTBcyXsbfTgrwsUNmVUb5xVwyPwg==}
     engines: {node: ^10 || ^12 || >=14}
 
+  prettier@3.9.4:
+    resolution: {integrity: sha512-yWG/o/4oJfo036EKAfK6ACAoDOfHeRHx4tuxkfBZiauURiaSmYwlpOr5LQqKtIkRD2z1PLteme2WoxEnj4tHTg==}
+    engines: {node: '>=14'}
+    hasBin: true
+
   pretty-format@27.5.1:
     resolution: {integrity: sha512-Qb1gy5OrP5+zDf2Bvnzdl3jsTf1qXVMazbvCoKhtKqVs4/YK4ozX4gKQJJVyNe+cajNPn0KoC0MC3FUmaHWEmQ==}
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
@@ -3897,6 +3908,11 @@ packages:
 
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
+
+  tsx@4.23.0:
+    resolution: {integrity: sha512-eUdUIaCr963q2h5u3+QwvYp0+eqPvn+egeqZUm0hwERCqqx1E3kK5ehbGCvqSE5MQAULr67ww0cA3jKc3YkM1w==}
+    engines: {node: '>=18.0.0'}
+    hasBin: true
 
   turbo@2.10.2:
     resolution: {integrity: sha512-wTExrNrRjB8qzIcg+ZLm0A3GFNLDsWNwdS/RBXB0FPrBDyzk3i96Yx+TxWZC7a0k1SIreFB8ciUbxjmEqTH8IQ==}
@@ -6094,13 +6110,13 @@ snapshots:
       chai: 5.3.3
       tinyrainbow: 2.0.0
 
-  '@vitest/mocker@3.2.6(vite@7.3.6(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(yaml@2.9.0))':
+  '@vitest/mocker@3.2.6(vite@7.3.6(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0))':
     dependencies:
       '@vitest/spy': 3.2.6
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 7.3.6(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(yaml@2.9.0)
+      vite: 7.3.6(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0)
 
   '@vitest/pretty-format@3.2.6':
     dependencies:
@@ -7782,6 +7798,8 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
+  prettier@3.9.4: {}
+
   pretty-format@27.5.1:
     dependencies:
       ansi-regex: 5.0.1
@@ -8371,6 +8389,12 @@ snapshots:
 
   tslib@2.8.1: {}
 
+  tsx@4.23.0:
+    dependencies:
+      esbuild: 0.28.1
+    optionalDependencies:
+      fsevents: 2.3.3
+
   turbo@2.10.2:
     optionalDependencies:
       '@turbo/darwin-64': 2.10.2
@@ -8494,13 +8518,13 @@ snapshots:
       - rollup
       - supports-color
 
-  vite-node@3.2.4(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(yaml@2.9.0):
+  vite-node@3.2.4(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0):
     dependencies:
       cac: 6.7.14
       debug: 4.4.3
       es-module-lexer: 1.7.0
       pathe: 2.0.3
-      vite: 7.3.6(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(yaml@2.9.0)
+      vite: 7.3.6(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0)
     transitivePeerDependencies:
       - '@types/node'
       - jiti
@@ -8515,7 +8539,7 @@ snapshots:
       - tsx
       - yaml
 
-  vite@7.3.6(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(yaml@2.9.0):
+  vite@7.3.6(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0):
     dependencies:
       esbuild: 0.28.1
       fdir: 6.5.0(picomatch@4.0.5)
@@ -8528,13 +8552,14 @@ snapshots:
       fsevents: 2.3.3
       lightningcss: 1.32.0
       terser: 5.48.0
+      tsx: 4.23.0
       yaml: 2.9.0
 
-  vitest@3.2.6(@edge-runtime/vm@3.2.0)(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(yaml@2.9.0):
+  vitest@3.2.6(@edge-runtime/vm@3.2.0)(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/expect': 3.2.6
-      '@vitest/mocker': 3.2.6(vite@7.3.6(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(yaml@2.9.0))
+      '@vitest/mocker': 3.2.6(vite@7.3.6(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0))
       '@vitest/pretty-format': 3.2.6
       '@vitest/runner': 3.2.6
       '@vitest/snapshot': 3.2.6
@@ -8552,8 +8577,8 @@ snapshots:
       tinyglobby: 0.2.17
       tinypool: 1.1.1
       tinyrainbow: 2.0.0
-      vite: 7.3.6(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(yaml@2.9.0)
-      vite-node: 3.2.4(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(yaml@2.9.0)
+      vite: 7.3.6(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0)
+      vite-node: 3.2.4(@types/node@22.20.0)(lightningcss@1.32.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@edge-runtime/vm': 3.2.0

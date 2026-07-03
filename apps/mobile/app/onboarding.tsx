@@ -1,3 +1,33 @@
-import { Text, View, StyleSheet } from 'react-native'; import { router } from 'expo-router'; import { Button, Screen, Title } from '@/components/ui'; import { colors } from '@/theme';
-export default function Onboarding(){return <Screen><View style={s.hero}><Text style={s.illustration}>♡</Text><Title subtitle="Pelajari tujuh tanda bahaya kehamilan melalui video singkat dan evaluasi terarah.">Kenali Tanda Bahaya, Lindungi Ibu dan Bayi</Title></View><View style={{marginTop:'auto',gap:12}}><Button onPress={()=>router.push('/respondent/register/step-1' as never)}>Mulai Sekarang</Button><Button variant="secondary" onPress={()=>router.push('/auth/researcher-login' as never)}>Masuk sebagai Peneliti</Button></View></Screen>}
-const s=StyleSheet.create({hero:{flex:1,justifyContent:'center',gap:28},illustration:{fontSize:120,textAlign:'center',color:colors.primary}});
+import { Text, View, StyleSheet } from 'react-native';
+import { router } from 'expo-router';
+import { Button, Screen, Title } from '@/components/ui';
+import { colors } from '@/theme';
+export default function Onboarding() {
+  return (
+    <Screen showBack={false}>
+      <View style={s.hero}>
+        <Text style={s.illustration}>♡</Text>
+        <Title subtitle="Pelajari tujuh tanda bahaya kehamilan melalui video singkat dan evaluasi terarah.">
+          Kenali Tanda Bahaya, Lindungi Ibu dan Bayi
+        </Title>
+      </View>
+      <View style={{ marginTop: 'auto', gap: 12 }}>
+        <Button
+          onPress={() => router.push('/respondent/register/step-1' as never)}
+        >
+          Mulai Sekarang
+        </Button>
+        <Button
+          variant="secondary"
+          onPress={() => router.push('/auth/researcher-login' as never)}
+        >
+          Masuk sebagai Peneliti
+        </Button>
+      </View>
+    </Screen>
+  );
+}
+const s = StyleSheet.create({
+  hero: { flex: 1, justifyContent: 'center', gap: 28 },
+  illustration: { fontSize: 120, textAlign: 'center', color: colors.primary },
+});

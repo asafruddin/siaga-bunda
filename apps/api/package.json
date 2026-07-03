@@ -1,9 +1,29 @@
 {
-  "name": "@siaga/api", "version": "0.1.0", "private": true, "type": "module",
-  "scripts": { "dev": "vercel dev", "build": "tsc --noEmit", "typecheck": "tsc --noEmit", "lint": "tsc --noEmit", "test": "vitest run" },
-  "dependencies": {
-    "@hono/node-server": "^1.14.4", "@siaga/shared": "workspace:*", "@supabase/supabase-js": "^2.50.0",
-    "hono": "^4.8.3", "jose": "^6.0.11", "zod": "^3.25.67"
+  "name": "@siaga/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/dev.ts",
+    "dev:vercel": "vercel dev",
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "test": "vitest run"
   },
-  "devDependencies": { "@types/node": "^22.15.32", "typescript": "^5.8.3", "vercel": "^44.2.3", "vitest": "^3.2.4" }
+  "dependencies": {
+    "@hono/node-server": "^1.14.4",
+    "@siaga/shared": "workspace:*",
+    "@supabase/supabase-js": "^2.50.0",
+    "hono": "^4.8.3",
+    "jose": "^6.0.11",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.32",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "vercel": "^44.2.3",
+    "vitest": "^3.2.4"
+  }
 }

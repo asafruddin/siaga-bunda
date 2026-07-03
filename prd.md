@@ -36,11 +36,7 @@ Researchers can access a mobile researcher view to monitor respondents, video pr
 
 ---
 
-
-
 # 3. Goals
-
-
 
 ## 3.1 Product Goals
 
@@ -51,8 +47,6 @@ Researchers can access a mobile researcher view to monitor respondents, video pr
 - Provide researchers with mobile access to monitoring and result data.
 - Support exportable research data.
 
-
-
 ## 3.2 Business / Research Goals
 
 - Improve education delivery consistency.
@@ -62,8 +56,6 @@ Researchers can access a mobile researcher view to monitor respondents, video pr
 - Create a mobile-first research monitoring system.
 
 ---
-
-
 
 # 4. Non-Goals
 
@@ -83,11 +75,7 @@ The MVP will not include:
 
 ---
 
-
-
 # 5. User Roles
-
-
 
 ## 5.1 Respondent / Pregnant Mother
 
@@ -112,8 +100,6 @@ Respondent cannot:
 - Access researcher monitoring screens.
 
 ---
-
-
 
 ## 5.2 Researcher
 
@@ -141,11 +127,7 @@ Researcher cannot:
 
 ---
 
-
-
 # 6. Target Platform
-
-
 
 ## 6.1 Mobile App
 
@@ -156,8 +138,6 @@ The mobile app will be built with:
 - TypeScript
 - Expo Router or React Navigation
 - Android and iOS support
-
-
 
 ## 6.2 Backend
 
@@ -172,8 +152,6 @@ Recommended backend characteristics:
 - Supabase client integration
 - JWT-based authentication or Supabase Auth integration
 - Background scheduling strategy for posttest reminders
-
-
 
 ## 6.3 Database
 
@@ -194,11 +172,7 @@ Supabase will store:
 
 ---
 
-
-
 # 7. Product Flow
-
-
 
 ## 7.1 Respondent Main Flow
 
@@ -219,8 +193,6 @@ Supabase will store:
 
 ---
 
-
-
 ## 7.2 Researcher Main Flow
 
 1. Researcher opens app.
@@ -236,15 +208,9 @@ Supabase will store:
 
 ---
 
-
-
 # 8. MVP Feature Scope
 
-
-
 ## 8.1 Respondent Features
-
-
 
 ### F-001: Splash Screen
 
@@ -261,8 +227,6 @@ Acceptance criteria:
 - Splash does not block app for too long.
 
 ---
-
-
 
 ### F-002: Onboarding / Front Page
 
@@ -284,8 +248,6 @@ Acceptance criteria:
 
 ---
 
-
-
 ### F-003: Respondent Registration
 
 The app must allow pregnant mothers to register.
@@ -303,8 +265,6 @@ Fields:
 - Education
 - Occupation
 
-
-
 #### Step 2: Pregnancy Data
 
 Fields:
@@ -315,8 +275,6 @@ Fields:
 - Number of children
 - Medical history
 - Birth history
-
-
 
 #### Step 3: Supporting Data
 
@@ -338,8 +296,6 @@ Acceptance criteria:
 - After successful registration, user goes to dashboard.
 
 ---
-
-
 
 ### F-004: Respondent Dashboard
 
@@ -375,8 +331,6 @@ Acceptance criteria:
 
 ---
 
-
-
 ### F-005: Pretest Flow
 
 Each video requires pretest before video opens.
@@ -399,8 +353,6 @@ Acceptance criteria:
 - Video becomes available after pretest submission.
 
 ---
-
-
 
 ### F-006: Video Watching Flow
 
@@ -425,8 +377,6 @@ Acceptance criteria:
 
 ---
 
-
-
 ### F-007: Posttest Scheduling
 
 After video is completed, the system schedules posttest 7 days later.
@@ -440,8 +390,6 @@ Acceptance criteria:
 - Next video remains locked.
 
 ---
-
-
 
 ### F-008: Reminder Notification
 
@@ -459,8 +407,6 @@ Acceptance criteria:
 - User can open posttest from dashboard even if notification is missed.
 
 ---
-
-
 
 ### F-009: Posttest Flow
 
@@ -486,8 +432,6 @@ Acceptance criteria:
 
 ---
 
-
-
 ### F-010: Profile
 
 Respondent can view profile data.
@@ -507,11 +451,7 @@ Acceptance criteria:
 
 ---
 
-
-
 # 9. Researcher Features
-
-
 
 ## F-011: Researcher Login
 
@@ -525,8 +465,6 @@ Acceptance criteria:
 - Researcher role is validated by backend.
 
 ---
-
-
 
 ## F-012: Researcher Mobile Home
 
@@ -553,8 +491,6 @@ Acceptance criteria:
 - UI uses mobile card layout, not desktop dashboard layout.
 
 ---
-
-
 
 ## F-013: Respondent List
 
@@ -584,8 +520,6 @@ Acceptance criteria:
 
 ---
 
-
-
 ## F-014: Respondent Detail
 
 Researcher can view respondent detail.
@@ -608,8 +542,6 @@ Acceptance criteria:
 
 ---
 
-
-
 ## F-015: Video Monitoring
 
 Researcher can monitor progress per video.
@@ -628,8 +560,6 @@ Acceptance criteria:
 - Researcher can tap a video to filter respondent list.
 
 ---
-
-
 
 ## F-016: Pretest Results
 
@@ -650,8 +580,6 @@ Acceptance criteria:
 
 ---
 
-
-
 ## F-017: Posttest Results
 
 Researcher can view posttest summary.
@@ -671,8 +599,6 @@ Acceptance criteria:
 
 ---
 
-
-
 ## F-018: Pretest vs Posttest Comparison
 
 Researcher can compare learning improvement.
@@ -691,8 +617,6 @@ Acceptance criteria:
 - Data is shown in simple mobile-friendly cards.
 
 ---
-
-
 
 ## F-019: Export Data
 
@@ -722,11 +646,7 @@ Acceptance criteria:
 
 ---
 
-
-
 # 10. Core Business Rules
-
-
 
 ## BR-001: First Video Availability
 
@@ -772,8 +692,6 @@ For 10 questions:
 - 8 correct = 80
 - 5 correct = 50
 
-
-
 ## BR-010: Audit Trail
 
 Important actions must be timestamped.
@@ -793,11 +711,7 @@ Tracked actions:
 
 ---
 
-
-
 # 11. Non-Functional Requirements
-
-
 
 ## NFR-001: Usability
 
@@ -814,8 +728,6 @@ Requirements:
 
 ---
 
-
-
 ## NFR-002: Reliability
 
 The app must preserve research flow accuracy.
@@ -828,8 +740,6 @@ Requirements:
 - User cannot bypass app flow from frontend only.
 
 ---
-
-
 
 ## NFR-003: Security
 
@@ -847,8 +757,6 @@ Requirements:
 
 ---
 
-
-
 ## NFR-004: Privacy
 
 Requirements:
@@ -859,8 +767,6 @@ Requirements:
 - Data deletion policy should be defined before production release.
 
 ---
-
-
 
 ## NFR-005: Performance
 
@@ -873,8 +779,6 @@ Requirements:
 - Mobile app should avoid unnecessary re-renders.
 
 ---
-
-
 
 ## NFR-006: Maintainability
 
@@ -889,11 +793,7 @@ Requirements:
 
 ---
 
-
-
 # 12. Recommended Technical Stack
-
-
 
 ## 12.1 Monorepo
 
@@ -904,8 +804,6 @@ Recommended tools:
 - Shared package for types, constants, validators, and API schemas.
 
 ---
-
-
 
 ## 12.2 Mobile App
 
@@ -926,8 +824,6 @@ Recommended stack:
 
 ---
 
-
-
 ## 12.3 Backend
 
 Recommended stack:
@@ -944,8 +840,6 @@ Recommended stack:
 
 ---
 
-
-
 ## 12.4 Database
 
 Recommended:
@@ -957,8 +851,6 @@ Recommended:
 - Separate table for audit logs.
 
 ---
-
-
 
 # 13. Monorepo Structure
 
@@ -1111,11 +1003,7 @@ siaga-bunda/
 
 ---
 
-
-
 # 14. Mobile App Structure Principles
-
-
 
 ## 14.1 Route Layer
 
@@ -1137,8 +1025,6 @@ DashboardScreen
 
 ---
 
-
-
 ## 14.2 Feature Layer
 
 Business logic should live inside `src/features`.
@@ -1155,8 +1041,6 @@ src/features/videos/
 ```
 
 ---
-
-
 
 ## 14.3 Shared UI Layer
 
@@ -1180,8 +1064,6 @@ Examples:
 
 ---
 
-
-
 ## 14.4 API Layer
 
 All API calls should be centralized.
@@ -1202,8 +1084,6 @@ src/features/tests/services/test-api.ts
 
 ---
 
-
-
 ## 14.5 State Management
 
 Use:
@@ -1220,11 +1100,7 @@ Avoid:
 
 ---
 
-
-
 # 15. Backend Structure Principles
-
-
 
 ## 15.1 Serverless API
 
@@ -1241,8 +1117,6 @@ Responsibilities:
 - Return consistent response.
 
 ---
-
-
 
 ## 15.2 Backend Modules
 
@@ -1265,8 +1139,6 @@ Each module can include:
 
 ---
 
-
-
 ## 15.3 Supabase Access
 
 The backend should use Supabase service role key only on the server side.
@@ -1283,11 +1155,7 @@ Backend responsibilities:
 
 ---
 
-
-
 # 16. Database Schema
-
-
 
 ## 16.1 users
 
@@ -1304,8 +1172,6 @@ Fields:
 - updated_at timestamp
 
 ---
-
-
 
 ## 16.2 respondents
 
@@ -1335,8 +1201,6 @@ Fields:
 
 ---
 
-
-
 ## 16.3 videos
 
 Stores education videos.
@@ -1354,8 +1218,6 @@ Fields:
 - updated_at timestamp
 
 ---
-
-
 
 ## 16.4 questions
 
@@ -1378,8 +1240,6 @@ Fields:
 
 ---
 
-
-
 ## 16.5 test_attempts
 
 Stores test submissions.
@@ -1398,8 +1258,6 @@ Fields:
 
 ---
 
-
-
 ## 16.6 test_answers
 
 Stores selected answers.
@@ -1414,8 +1272,6 @@ Fields:
 - created_at timestamp
 
 ---
-
-
 
 ## 16.7 video_progress
 
@@ -1447,8 +1303,6 @@ Status values:
 
 ---
 
-
-
 ## 16.8 posttest_schedules
 
 Stores posttest availability.
@@ -1465,8 +1319,6 @@ Fields:
 - updated_at timestamp
 
 ---
-
-
 
 ## 16.9 notifications
 
@@ -1487,8 +1339,6 @@ Fields:
 
 ---
 
-
-
 ## 16.10 audit_logs
 
 Stores important system actions.
@@ -1506,8 +1356,6 @@ Fields:
 
 ---
 
-
-
 ## 16.11 export_logs
 
 Stores export actions.
@@ -1523,11 +1371,7 @@ Fields:
 
 ---
 
-
-
 # 17. API Requirements
-
-
 
 ## 17.1 API Response Format
 
@@ -1556,15 +1400,9 @@ Error:
 
 ---
 
-
-
 # 18. API Endpoint List
 
-
-
 ## Auth
-
-
 
 ### POST /api/auth/login
 
@@ -1593,15 +1431,11 @@ Response:
 
 ---
 
-
-
 ### GET /api/auth/me
 
 Get current authenticated user.
 
 ---
-
-
 
 ### POST /api/auth/logout
 
@@ -1609,11 +1443,7 @@ Logout current user.
 
 ---
 
-
-
 ## Respondent
-
-
 
 ### POST /api/respondents/register
 
@@ -1621,15 +1451,11 @@ Create respondent profile.
 
 ---
 
-
-
 ### GET /api/respondents/me
 
 Get current respondent profile.
 
 ---
-
-
 
 ### PUT /api/respondents/me
 
@@ -1637,11 +1463,7 @@ Update limited respondent profile fields.
 
 ---
 
-
-
 ## Videos
-
-
 
 ### GET /api/videos
 
@@ -1649,23 +1471,17 @@ Get all videos with respondent-specific status.
 
 ---
 
-
-
 ### GET /api/videos/:id
 
 Get video detail.
 
 ---
 
-
-
 ### POST /api/videos/:id/start
 
 Record video watch start.
 
 ---
-
-
 
 ### POST /api/videos/:id/progress
 
@@ -1683,8 +1499,6 @@ Request:
 
 ---
 
-
-
 ### POST /api/videos/:id/complete
 
 Complete video when valid.
@@ -1698,11 +1512,7 @@ Backend validation:
 
 ---
 
-
-
 ## Tests
-
-
 
 ### GET /api/videos/:id/pretest
 
@@ -1710,15 +1520,11 @@ Get pretest questions.
 
 ---
 
-
-
 ### POST /api/videos/:id/pretest/submit
 
 Submit pretest answers.
 
 ---
-
-
 
 ### GET /api/videos/:id/posttest
 
@@ -1731,8 +1537,6 @@ Backend validation:
 - Posttest not already submitted.
 
 ---
-
-
 
 ### POST /api/videos/:id/posttest/submit
 
@@ -1747,19 +1551,13 @@ Backend behavior:
 
 ---
 
-
-
 ## Researcher
-
-
 
 ### GET /api/researcher/overview
 
 Get researcher summary.
 
 ---
-
-
 
 ### GET /api/researcher/respondents
 
@@ -1772,15 +1570,11 @@ Query params:
 
 ---
 
-
-
 ### GET /api/researcher/respondents/:id
 
 Get respondent detail.
 
 ---
-
-
 
 ### GET /api/researcher/videos/monitoring
 
@@ -1788,15 +1582,11 @@ Get video monitoring summary.
 
 ---
 
-
-
 ### GET /api/researcher/results/pretest
 
 Get pretest result summary.
 
 ---
-
-
 
 ### GET /api/researcher/results/posttest
 
@@ -1804,15 +1594,11 @@ Get posttest result summary.
 
 ---
 
-
-
 ### GET /api/researcher/results/comparison
 
 Get pretest vs posttest comparison.
 
 ---
-
-
 
 ### POST /api/researcher/export
 
@@ -1832,11 +1618,7 @@ Request:
 
 ---
 
-
-
 ## Jobs
-
-
 
 ### POST /api/jobs/send-posttest-reminders
 
@@ -1856,19 +1638,13 @@ Security:
 
 ---
 
-
-
 # 19. Notification Requirements
-
-
 
 ## 19.1 Notification Types
 
 - Posttest available.
 - Optional: registration success.
 - Optional: education progress reminder.
-
-
 
 ## 19.2 Posttest Reminder
 
@@ -1886,11 +1662,7 @@ Fallback:
 
 ---
 
-
-
 # 20. Video Tracking Requirements
-
-
 
 ## 20.1 Progress Checkpoint
 
@@ -1903,8 +1675,6 @@ Recommended:
 - On app background.
 - On video completion.
 
-
-
 ## 20.2 No-Skip Rule
 
 The mobile app should block forward seeking.
@@ -1916,8 +1686,6 @@ Backend should also validate:
 - max_watched_seconds
 - video duration
 
-
-
 ## 20.3 Resume Behavior
 
 If user leaves before completion:
@@ -1928,11 +1696,7 @@ If user leaves before completion:
 
 ---
 
-
-
 # 21. UI / UX Requirements
-
-
 
 ## 21.1 Design Direction
 
@@ -1950,8 +1714,6 @@ Suggested colors:
 - White.
 - Soft blue.
 - Neutral gray.
-
-
 
 ## 21.2 Component Requirements
 
@@ -1973,11 +1735,7 @@ Reusable components:
 
 ---
 
-
-
 # 22. Environment Variables
-
-
 
 ## 22.1 Mobile App
 
@@ -1992,8 +1750,6 @@ Note:
 Mobile app must only use public-safe environment values.
 
 ---
-
-
 
 ## 22.2 Backend
 
@@ -2011,8 +1767,6 @@ Important:
 `SUPABASE_SERVICE_ROLE_KEY` must only be stored in Vercel backend environment variables.
 
 ---
-
-
 
 # 23. Data Privacy and Consent
 
@@ -2033,11 +1787,7 @@ Requirements:
 
 ---
 
-
-
 # 24. Analytics and Audit
-
-
 
 ## 24.1 Required Audit Events
 
@@ -2053,8 +1803,6 @@ Requirements:
 - next_video_unlocked
 - researcher_export_requested
 
-
-
 ## 24.2 Research Metrics
 
 Track:
@@ -2069,15 +1817,9 @@ Track:
 
 ---
 
-
-
 # 25. MVP User Stories
 
-
-
 ## Epic 1: Project Foundation
-
-
 
 ### Story 1.1: Setup Monorepo
 
@@ -2094,8 +1836,6 @@ Acceptance criteria:
 
 ---
 
-
-
 ### Story 1.2: Setup Mobile App
 
 As a developer, I want a proper Expo React Native structure so that the app is maintainable.
@@ -2109,8 +1849,6 @@ Acceptance criteria:
 - Environment config is available.
 
 ---
-
-
 
 ### Story 1.3: Setup Backend API
 
@@ -2126,11 +1864,7 @@ Acceptance criteria:
 
 ---
 
-
-
 ## Epic 2: Authentication and Roles
-
-
 
 ### Story 2.1: Respondent Session
 
@@ -2143,8 +1877,6 @@ Acceptance criteria:
 - Expired session redirects to onboarding.
 
 ---
-
-
 
 ### Story 2.2: Researcher Login
 
@@ -2159,11 +1891,7 @@ Acceptance criteria:
 
 ---
 
-
-
 ## Epic 3: Registration
-
-
 
 ### Story 3.1: Identity Form
 
@@ -2176,8 +1904,6 @@ Acceptance criteria:
 
 ---
 
-
-
 ### Story 3.2: Pregnancy Form
 
 As a respondent, I want to enter pregnancy data.
@@ -2189,8 +1915,6 @@ Acceptance criteria:
 - Pregnancy age is auto-calculated.
 
 ---
-
-
 
 ### Story 3.3: Supporting Data Form
 
@@ -2205,11 +1929,7 @@ Acceptance criteria:
 
 ---
 
-
-
 ## Epic 4: Respondent Dashboard
-
-
 
 ### Story 4.1: View Dashboard
 
@@ -2224,8 +1944,6 @@ Acceptance criteria:
 
 ---
 
-
-
 ### Story 4.2: Locked Video Feedback
 
 As a respondent, I want to know why a video is locked.
@@ -2238,11 +1956,7 @@ Acceptance criteria:
 
 ---
 
-
-
 ## Epic 5: Pretest
-
-
 
 ### Story 5.1: Start Pretest
 
@@ -2255,8 +1969,6 @@ Acceptance criteria:
 - Questions are loaded from backend.
 
 ---
-
-
 
 ### Story 5.2: Submit Pretest
 
@@ -2271,11 +1983,7 @@ Acceptance criteria:
 
 ---
 
-
-
 ## Epic 6: Video Education
-
-
 
 ### Story 6.1: Watch Video
 
@@ -2290,8 +1998,6 @@ Acceptance criteria:
 
 ---
 
-
-
 ### Story 6.2: Complete Video
 
 As a respondent, I want video to be marked complete after watching fully.
@@ -2305,11 +2011,7 @@ Acceptance criteria:
 
 ---
 
-
-
 ## Epic 7: Posttest
-
-
 
 ### Story 7.1: Receive Posttest Reminder
 
@@ -2322,8 +2024,6 @@ Acceptance criteria:
 - User can open posttest.
 
 ---
-
-
 
 ### Story 7.2: Submit Posttest
 
@@ -2339,11 +2039,7 @@ Acceptance criteria:
 
 ---
 
-
-
 ## Epic 8: Researcher Monitoring
-
-
 
 ### Story 8.1: Researcher Home
 
@@ -2358,8 +2054,6 @@ Acceptance criteria:
 
 ---
 
-
-
 ### Story 8.2: Respondent List
 
 As a researcher, I want to see respondent list.
@@ -2372,8 +2066,6 @@ Acceptance criteria:
 - Detail can be opened.
 
 ---
-
-
 
 ### Story 8.3: Respondent Detail
 
@@ -2388,8 +2080,6 @@ Acceptance criteria:
 
 ---
 
-
-
 ### Story 8.4: Video Monitoring
 
 As a researcher, I want to monitor each video.
@@ -2400,8 +2090,6 @@ Acceptance criteria:
 - Each card shows pretest, video, waiting posttest, and posttest counts.
 
 ---
-
-
 
 ### Story 8.5: Result Summary
 
@@ -2415,11 +2103,7 @@ Acceptance criteria:
 
 ---
 
-
-
 ## Epic 9: Export
-
-
 
 ### Story 9.1: Export Data
 
@@ -2434,11 +2118,7 @@ Acceptance criteria:
 
 ---
 
-
-
 # 26. Release Plan
-
-
 
 ## Phase 1: Technical Foundation
 
@@ -2451,8 +2131,6 @@ Deliverables:
 - Auth setup.
 - Base UI components.
 
-
-
 ## Phase 2: Respondent Core Flow
 
 Deliverables:
@@ -2464,8 +2142,6 @@ Deliverables:
 - Video player.
 - Video progress tracking.
 
-
-
 ## Phase 3: Posttest and Locking
 
 Deliverables:
@@ -2475,8 +2151,6 @@ Deliverables:
 - Posttest flow.
 - Unlock next video.
 - Completion progress.
-
-
 
 ## Phase 4: Researcher Mobile Monitoring
 
@@ -2488,8 +2162,6 @@ Deliverables:
 - Respondent detail.
 - Video monitoring.
 - Result summary.
-
-
 
 ## Phase 5: Export and QA
 
@@ -2503,11 +2175,7 @@ Deliverables:
 
 ---
 
-
-
 # 27. QA Test Scenarios
-
-
 
 ## Registration
 
@@ -2517,8 +2185,6 @@ Deliverables:
 - Submit complete registration.
 - Verify dashboard opens.
 
-
-
 ## Pretest
 
 - Try opening video before pretest.
@@ -2526,8 +2192,6 @@ Deliverables:
 - Submit complete pretest.
 - Verify score is stored.
 - Verify video opens.
-
-
 
 ## Video
 
@@ -2538,8 +2202,6 @@ Deliverables:
 - Complete video.
 - Verify posttest schedule.
 
-
-
 ## Posttest
 
 - Try opening before 7 days.
@@ -2547,8 +2209,6 @@ Deliverables:
 - Submit incomplete posttest.
 - Submit complete posttest.
 - Verify next video unlocks.
-
-
 
 ## Researcher
 
@@ -2563,11 +2223,7 @@ Deliverables:
 
 ---
 
-
-
 # 28. Success Metrics
-
-
 
 ## Product Metrics
 
@@ -2578,8 +2234,6 @@ Deliverables:
 - Average time to complete video flow.
 - Drop-off rate per video.
 
-
-
 ## Research Metrics
 
 - Average pretest score.
@@ -2587,8 +2241,6 @@ Deliverables:
 - Score improvement percentage.
 - Number of valid respondents.
 - Number of incomplete respondents.
-
-
 
 ## Technical Metrics
 
@@ -2599,8 +2251,6 @@ Deliverables:
 - Export success rate.
 
 ---
-
-
 
 # 29. Open Questions
 
@@ -2617,11 +2267,7 @@ These need final decision before implementation:
 
 ---
 
-
-
 # 30. Recommended BMAD Next Steps
-
-
 
 ## Step 1: Architect Document
 
@@ -2638,8 +2284,6 @@ Output:
 - Notification strategy.
 - Deployment strategy.
 
-
-
 ## Step 2: UX Specification
 
 Create Figma-ready UX spec.
@@ -2651,8 +2295,6 @@ Output:
 - User flow.
 - Empty/loading/error states.
 - Mobile researcher flow.
-
-
 
 ## Step 3: Scrum Story Breakdown
 
@@ -2667,8 +2309,6 @@ Output:
 - Dependencies.
 - Priority.
 
-
-
 ## Step 4: Implementation
 
 Start with:
@@ -2679,4 +2319,3 @@ Start with:
 4. Expo mobile base navigation.
 5. Registration flow.
 6. Respondent dashboard.
-

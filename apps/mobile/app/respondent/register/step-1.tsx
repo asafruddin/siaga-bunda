@@ -1,2 +1,72 @@
-import { useState } from 'react'; import { Alert } from 'react-native'; import { router } from 'expo-router'; import { Button, Field, Screen, Title } from '@/components/ui'; import { useRegistration } from '@/features/registration/store';
-export default function Step1(){const d=useRegistration();const[name,setName]=useState(d.name??'');const[age,setAge]=useState(String(d.age??''));const[phone,setPhone]=useState(d.phoneNumber??'');const[address,setAddress]=useState(d.address??'');const[education,setEducation]=useState(d.education??'');const[occupation,setOccupation]=useState(d.occupation??'');function next(){if(name.trim().length<2||!Number(age)||phone.replace(/\D/g,'').length<9||address.trim().length<5||!education||!occupation)return Alert.alert('Data belum lengkap','Isi seluruh data identitas dengan benar.');d.set({name:name.trim(),age:Number(age),phoneNumber:phone,address,education,occupation});router.push('/respondent/register/step-2' as never)}return <Screen><Title subtitle="Langkah 1 dari 3">Data Identitas</Title><Field label="Nama lengkap" value={name} onChangeText={setName}/><Field label="Usia" value={age} onChangeText={setAge} keyboardType="number-pad"/><Field label="Nomor telepon" value={phone} onChangeText={setPhone} keyboardType="phone-pad"/><Field label="Alamat" value={address} onChangeText={setAddress} multiline/><Field label="Pendidikan terakhir" value={education} onChangeText={setEducation}/><Field label="Pekerjaan" value={occupation} onChangeText={setOccupation}/><Button onPress={next}>Lanjutkan</Button></Screen>}
+import { useState } from 'react';
+import { Alert } from 'react-native';
+import { router } from 'expo-router';
+import { Button, Field, Screen, Title } from '@/components/ui';
+import { useRegistration } from '@/features/registration/store';
+export default function Step1() {
+  const d = useRegistration();
+  const [name, setName] = useState(d.name ?? '');
+  const [age, setAge] = useState(String(d.age ?? ''));
+  const [phone, setPhone] = useState(d.phoneNumber ?? '');
+  const [address, setAddress] = useState(d.address ?? '');
+  const [education, setEducation] = useState(d.education ?? '');
+  const [occupation, setOccupation] = useState(d.occupation ?? '');
+  function next() {
+    if (
+      name.trim().length < 2 ||
+      !Number(age) ||
+      phone.replace(/\D/g, '').length < 9 ||
+      address.trim().length < 5 ||
+      !education ||
+      !occupation
+    )
+      return Alert.alert(
+        'Data belum lengkap',
+        'Isi seluruh data identitas dengan benar.',
+      );
+    d.set({
+      name: name.trim(),
+      age: Number(age),
+      phoneNumber: phone,
+      address,
+      education,
+      occupation,
+    });
+    router.push('/respondent/register/step-2' as never);
+  }
+  return (
+    <Screen>
+      <Title subtitle="Langkah 1 dari 3">Data Identitas</Title>
+      <Field label="Nama lengkap" value={name} onChangeText={setName} />
+      <Field
+        label="Usia"
+        value={age}
+        onChangeText={setAge}
+        keyboardType="number-pad"
+      />
+      <Field
+        label="Nomor telepon"
+        value={phone}
+        onChangeText={setPhone}
+        keyboardType="phone-pad"
+      />
+      <Field
+        label="Alamat"
+        value={address}
+        onChangeText={setAddress}
+        multiline
+      />
+      <Field
+        label="Pendidikan terakhir"
+        value={education}
+        onChangeText={setEducation}
+      />
+      <Field
+        label="Pekerjaan"
+        value={occupation}
+        onChangeText={setOccupation}
+      />
+      <Button onPress={next}>Lanjutkan</Button>
+    </Screen>
+  );
+}
