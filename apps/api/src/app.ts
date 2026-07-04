@@ -45,6 +45,21 @@ app.onError((error, c) => {
     500,
   );
 });
+app.notFound((c) =>
+  fail(
+    c,
+    'NOT_FOUND',
+    `Endpoint ${c.req.method} ${c.req.path} tidak ditemukan.`,
+    404,
+  ),
+);
+app.get('/', (c) =>
+  ok(c, {
+    service: 'siaga-bunda-api',
+    status: 'online',
+    documentation: '/api/health',
+  }),
+);
 app.get('/health', (c) =>
   ok(c, {
     service: 'siaga-bunda-api',

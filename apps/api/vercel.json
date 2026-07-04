@@ -2,5 +2,19 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "installCommand": "cd ../.. && pnpm install",
-  "buildCommand": "cd ../.. && pnpm turbo build --filter=@siaga/api..."
+  "buildCommand": "cd ../.. && pnpm turbo build --filter=@siaga/api...",
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/api/gateway?__route="
+    },
+    {
+      "source": "/api",
+      "destination": "/api/gateway?__route="
+    },
+    {
+      "source": "/api/:route*",
+      "destination": "/api/gateway?__route=:route*"
+    }
+  ]
 }
