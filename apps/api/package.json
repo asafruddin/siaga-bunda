@@ -14,7 +14,7 @@
   "dependencies": {
     "@hono/node-server": "^1.14.4",
     "@siaga/shared": "workspace:*",
-    "@supabase/supabase-js": "^2.50.0",
+    "@supabase/supabase-js": "2.110.0",
     "hono": "^4.8.3",
     "jose": "^6.0.11",
     "zod": "^3.25.67"

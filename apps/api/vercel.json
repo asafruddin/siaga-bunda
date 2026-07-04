@@ -4,5 +4,10 @@
   "installCommand": "cd ../.. && pnpm install",
   "buildCommand": "cd ../.. && pnpm turbo build --filter=@siaga/api...",
   "outputDirectory": "public",
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": "node_modules/@siaga/shared/dist/**"
+    }
+  },
   "rewrites": [{ "source": "/api/(.*)", "destination": "/api" }]
 }

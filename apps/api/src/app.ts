@@ -1,7 +1,6 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
-import { createClient } from '@supabase/supabase-js';
 import {
   calculateHpl,
   calculatePregnancyWeeks,
@@ -58,22 +57,37 @@ app.post('/auth/login', async (c) => {
   const { identifier, password } = await c.req.json();
   if (!identifier || !password)
     return fail(c, 'VALIDATION_ERROR', 'Email dan kata sandi wajib diisi.');
-  const anon = createClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_ANON_KEY!,
-    { auth: { persistSession: false } },
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const anonKey = process.env.SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !anonKey)
+    return fail(
+      c,
+      'INTERNAL_ERROR',
+      'Konfigurasi autentikasi belum lengkap.',
+      500,
+    );
+  const response = await fetch(
+    `${supabaseUrl}/auth/v1/token?grant_type=password`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: anonKey,
+        Authorization: `Bearer ${anonKey}`,
+      },
+      body: JSON.stringify({ email: identifier, password }),
+    },
   );
-  const signed = await anon.auth.signInWithPassword({
-    email: identifier,
-    password,
-  });
-  if (signed.error || !signed.data.user)
+  if (!response.ok)
+    return fail(c, 'INVALID_CREDENTIALS', 'Email atau kata sandi salah.', 401);
+  const payload = (await response.json()) as { user?: { id: string } };
+  if (!payload.user?.id)
     return fail(c, 'INVALID_CREDENTIALS', 'Email atau kata sandi salah.', 401);
   const user = row(
     await db()
       .from('users')
       .select('id,role')
-      .eq('auth_user_id', signed.data.user.id)
+      .eq('auth_user_id', payload.user.id)
       .single(),
   ) as any;
   if (!user || user.role !== 'researcher')
