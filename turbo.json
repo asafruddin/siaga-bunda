@@ -12,7 +12,7 @@
     "dev": { "cache": false, "persistent": true },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "api/index.js", ".expo/**"]
+      "outputs": ["dist/**", "api/handler.js", ".expo/**"]
     },
     "typecheck": { "dependsOn": ["^typecheck"] },
     "lint": { "dependsOn": ["^lint"] },

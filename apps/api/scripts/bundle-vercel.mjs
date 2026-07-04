@@ -10,7 +10,7 @@ await esbuild.build({
   platform: 'node',
   target: 'node22',
   format: 'esm',
-  outfile: resolve(root, 'api/index.js'),
+  outfile: resolve(root, 'api/handler.js'),
   alias: {
     '@siaga/shared': resolve(root, '../../packages/shared/dist/index.js'),
   },
