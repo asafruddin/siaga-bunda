@@ -1,4 +1,11 @@
-import { handle } from 'hono/vercel';
 import { app } from './app.js';
 
-export default handle(app);
+const serve = (request: Request) => app.fetch(request);
+
+export const GET = serve;
+export const POST = serve;
+export const PUT = serve;
+export const PATCH = serve;
+export const DELETE = serve;
+export const OPTIONS = serve;
+export const HEAD = serve;

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx src/dev.ts",
     "dev:vercel": "pnpm build && vercel dev",
-    "build": "tsc --noEmit && node scripts/bundle-vercel.mjs",
+    "build": "node scripts/bundle-vercel.mjs && tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
     "test": "vitest run"
