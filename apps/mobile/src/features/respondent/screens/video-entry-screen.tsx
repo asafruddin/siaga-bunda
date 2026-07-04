@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { Loading, Screen } from '@/components/ui';
+import { Button, Loading, Notice, Screen } from '@/components/ui';
 import { api } from '@/services/api';
 import type { VideoStatus } from '@siaga/shared';
 
@@ -10,6 +10,7 @@ export function VideoEntryScreen() {
   const q = useQuery({
     queryKey: ['video', id],
     queryFn: () => api<any>(`/videos/${id}`),
+    enabled: Boolean(id),
   });
   useEffect(() => {
     const status = q.data?.progress?.status as VideoStatus | undefined;
@@ -26,6 +27,14 @@ export function VideoEntryScreen() {
               : 'video-completed';
     router.replace(`/respondent/videos/${id}/${path}` as never);
   }, [id, q.data]);
+  if (q.error)
+    return (
+      <Screen>
+        <Notice action={<Button onPress={() => q.refetch()}>Coba lagi</Button>}>
+          {q.error.message}
+        </Notice>
+      </Screen>
+    );
   return (
     <Screen>
       <Loading />

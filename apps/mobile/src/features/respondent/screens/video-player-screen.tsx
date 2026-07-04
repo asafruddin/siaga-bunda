@@ -1,18 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Alert, AppState, Text, View } from 'react-native';
+import { Alert, AppState, StyleSheet, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import {
-  Button,
-  Loading,
-  Notice,
-  Progress,
-  Screen,
-  Title,
-  ui,
-} from '@/components/ui';
+import { Button, Loading, Notice, Progress, Screen } from '@/components/ui';
 import { api, post } from '@/services/api';
+import { colors } from '@/theme';
 import { respondentStyles as s } from '../lib/styles';
 
 export function VideoPlayerScreen() {
@@ -31,7 +24,9 @@ export function VideoPlayerScreen() {
   if (q.error || !q.data)
     return (
       <Screen>
-        <Notice>{q.error?.message ?? 'Video tidak ditemukan.'}</Notice>
+        <Notice action={<Button onPress={() => q.refetch()}>Coba lagi</Button>}>
+          {q.error?.message ?? 'Video tidak ditemukan.'}
+        </Notice>
       </Screen>
     );
   return (
@@ -144,22 +139,58 @@ function VideoPlayer({ video, onDone }: { video: any; onDone: () => void }) {
   const completed =
     max >= video.duration_seconds - 2 &&
     watched >= video.duration_seconds * 0.9;
+  const percentage = Math.min(100, (max / video.duration_seconds) * 100);
+  const remaining = Math.max(0, video.duration_seconds - max);
   return (
     <Screen>
-      <Title subtitle="Video tidak dapat dimajukan. Anda dapat menjeda atau mengulang bagian yang sudah ditonton.">
-        {video.title}
-      </Title>
-      <VideoView
-        player={player}
-        style={s.video}
-        nativeControls={false}
-        contentFit="contain"
-      />
-      <Progress value={(max / video.duration_seconds) * 100} />
-      <Text style={ui.muted}>
-        {Math.floor(max)} / {video.duration_seconds} detik • waktu ditonton{' '}
-        {Math.floor(watched)} detik
-      </Text>
+      <View style={styles.heading}>
+        <View style={styles.eyebrowPill}>
+          <Text style={styles.eyebrowText}>VIDEO EDUKASI</Text>
+        </View>
+        <Text style={styles.title}>{video.title}</Text>
+        <Text style={styles.subtitle}>
+          Tonton sampai selesai untuk membuka jadwal posttest.
+        </Text>
+      </View>
+
+      <View style={styles.playerFrame}>
+        <VideoView
+          player={player}
+          style={s.video}
+          nativeControls={false}
+          contentFit="contain"
+        />
+        <View style={styles.playerStatus}>
+          <View style={styles.liveDot} />
+          <Text style={styles.playerStatusText}>
+            {playing ? 'Sedang diputar' : 'Dijeda'}
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.watchCard}>
+        <View style={styles.watchHeading}>
+          <View>
+            <Text style={styles.watchLabel}>PROGRES MENONTON</Text>
+            <Text style={styles.watchValue}>{Math.round(percentage)}%</Text>
+          </View>
+          <View style={styles.timePill}>
+            <Text style={styles.timePillText}>
+              {Math.floor(remaining)} detik tersisa
+            </Text>
+          </View>
+        </View>
+        <Progress value={percentage} />
+        <View style={styles.watchStats}>
+          <Text style={styles.watchStatText}>
+            Posisi {Math.floor(max)} detik
+          </Text>
+          <Text style={styles.watchStatText}>
+            Ditonton {Math.floor(watched)} detik
+          </Text>
+        </View>
+      </View>
+
       <View style={{ flexDirection: 'row', gap: 10 }}>
         <View style={{ flex: 1 }}>
           <Button
@@ -168,13 +199,22 @@ function VideoPlayer({ video, onDone }: { video: any; onDone: () => void }) {
               player.currentTime = Math.max(0, player.currentTime - 10);
             }}
           >
-            −10 detik
+            ↶ 10 detik
           </Button>
         </View>
         <View style={{ flex: 1 }}>
-          <Button onPress={toggle}>{playing ? 'Jeda' : 'Putar'}</Button>
+          <Button onPress={toggle}>{playing ? 'Ⅱ Jeda' : '▶ Putar'}</Button>
         </View>
       </View>
+
+      <View style={styles.noSkipNote}>
+        <Text style={styles.noSkipIcon}>⌾</Text>
+        <Text style={styles.noSkipText}>
+          Bagian yang belum ditonton tidak dapat dilewati. Ibu tetap dapat
+          mengulang bagian sebelumnya atau menjeda video kapan saja.
+        </Text>
+      </View>
+
       <Button disabled={!completed || busy} onPress={finish}>
         {busy
           ? 'Menyimpan…'
@@ -185,3 +225,95 @@ function VideoPlayer({ video, onDone }: { video: any; onDone: () => void }) {
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  heading: { gap: 8 },
+  eyebrowPill: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 99,
+    backgroundColor: colors.pink,
+  },
+  eyebrowText: {
+    color: colors.primaryDark,
+    fontSize: 8,
+    fontWeight: '900',
+    letterSpacing: 0.8,
+  },
+  title: {
+    color: colors.text,
+    fontSize: 25,
+    fontWeight: '900',
+    lineHeight: 31,
+  },
+  subtitle: { color: colors.muted, fontSize: 12, lineHeight: 18 },
+  playerFrame: {
+    padding: 5,
+    borderRadius: 22,
+    backgroundColor: '#211820',
+    shadowColor: '#211820',
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
+  },
+  playerStatus: {
+    position: 'absolute',
+    top: 14,
+    left: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 99,
+    backgroundColor: 'rgba(0,0,0,0.58)',
+  },
+  liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#F28AAC' },
+  playerStatusText: { color: 'white', fontSize: 8, fontWeight: '800' },
+  watchCard: {
+    gap: 12,
+    padding: 15,
+    borderRadius: 19,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  watchHeading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  watchLabel: {
+    color: colors.muted,
+    fontSize: 8,
+    fontWeight: '900',
+    letterSpacing: 0.8,
+  },
+  watchValue: {
+    marginTop: 2,
+    color: colors.primaryDark,
+    fontSize: 24,
+    fontWeight: '900',
+  },
+  timePill: {
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 99,
+    backgroundColor: colors.purple,
+  },
+  timePillText: { color: colors.primaryDark, fontSize: 9, fontWeight: '800' },
+  watchStats: { flexDirection: 'row', justifyContent: 'space-between' },
+  watchStatText: { color: colors.muted, fontSize: 9 },
+  noSkipNote: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 9,
+    padding: 12,
+    borderRadius: 15,
+    backgroundColor: colors.blue,
+  },
+  noSkipIcon: { color: colors.primaryDark, fontSize: 16, fontWeight: '900' },
+  noSkipText: { flex: 1, color: colors.muted, fontSize: 9, lineHeight: 14 },
+});

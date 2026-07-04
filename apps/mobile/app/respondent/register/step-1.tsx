@@ -1,72 +1,107 @@
 import { useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, View } from 'react-native';
 import { router } from 'expo-router';
-import { Button, Field, Screen, Title } from '@/components/ui';
+import { Button, Field, Screen } from '@/components/ui';
+import {
+  FormSection,
+  RegistrationHeader,
+  registrationStyles as s,
+} from '@/features/registration/ui';
 import { useRegistration } from '@/features/registration/store';
+
 export default function Step1() {
-  const d = useRegistration();
-  const [name, setName] = useState(d.name ?? '');
-  const [age, setAge] = useState(String(d.age ?? ''));
-  const [phone, setPhone] = useState(d.phoneNumber ?? '');
-  const [address, setAddress] = useState(d.address ?? '');
-  const [education, setEducation] = useState(d.education ?? '');
-  const [occupation, setOccupation] = useState(d.occupation ?? '');
+  const draft = useRegistration();
+  const [name, setName] = useState(draft.name ?? '');
+  const [age, setAge] = useState(String(draft.age ?? ''));
+  const [phone, setPhone] = useState(draft.phoneNumber ?? '');
+  const [address, setAddress] = useState(draft.address ?? '');
+  const [education, setEducation] = useState(draft.education ?? '');
+  const [occupation, setOccupation] = useState(draft.occupation ?? '');
+
   function next() {
     if (
       name.trim().length < 2 ||
       !Number(age) ||
       phone.replace(/\D/g, '').length < 9 ||
       address.trim().length < 5 ||
-      !education ||
-      !occupation
+      !education.trim() ||
+      !occupation.trim()
     )
       return Alert.alert(
         'Data belum lengkap',
         'Isi seluruh data identitas dengan benar.',
       );
-    d.set({
+    draft.set({
       name: name.trim(),
       age: Number(age),
       phoneNumber: phone,
-      address,
-      education,
-      occupation,
+      address: address.trim(),
+      education: education.trim(),
+      occupation: occupation.trim(),
     });
     router.push('/respondent/register/step-2' as never);
   }
+
   return (
     <Screen>
-      <Title subtitle="Langkah 1 dari 3">Data Identitas</Title>
-      <Field label="Nama lengkap" value={name} onChangeText={setName} />
-      <Field
-        label="Usia"
-        value={age}
-        onChangeText={setAge}
-        keyboardType="number-pad"
-      />
-      <Field
-        label="Nomor telepon"
-        value={phone}
-        onChangeText={setPhone}
-        keyboardType="phone-pad"
-      />
-      <Field
-        label="Alamat"
-        value={address}
-        onChangeText={setAddress}
-        multiline
-      />
-      <Field
-        label="Pendidikan terakhir"
-        value={education}
-        onChangeText={setEducation}
-      />
-      <Field
-        label="Pekerjaan"
-        value={occupation}
-        onChangeText={setOccupation}
-      />
-      <Button onPress={next}>Lanjutkan</Button>
+      <RegistrationHeader step={1} />
+      <FormSection
+        title="Data diri"
+        hint="Pastikan informasi sesuai identitas Ibu"
+      >
+        <Field
+          label="Nama lengkap"
+          value={name}
+          onChangeText={setName}
+          placeholder="Contoh: Mona Lestari"
+          autoCapitalize="words"
+        />
+        <View style={s.twoColumns}>
+          <View style={s.column}>
+            <Field
+              label="Usia"
+              value={age}
+              onChangeText={setAge}
+              placeholder="24"
+              keyboardType="number-pad"
+            />
+          </View>
+          <View style={{ flex: 1.6 }}>
+            <Field
+              label="Nomor telepon"
+              value={phone}
+              onChangeText={setPhone}
+              placeholder="08xxxxxxxxxx"
+              keyboardType="phone-pad"
+            />
+          </View>
+        </View>
+        <Field
+          label="Alamat tempat tinggal"
+          value={address}
+          onChangeText={setAddress}
+          placeholder="Kota/kabupaten dan alamat"
+          multiline
+        />
+      </FormSection>
+      <FormSection
+        title="Latar belakang"
+        hint="Informasi pendidikan dan pekerjaan"
+      >
+        <Field
+          label="Pendidikan terakhir"
+          value={education}
+          onChangeText={setEducation}
+          placeholder="Contoh: SMA, D3, S1"
+        />
+        <Field
+          label="Pekerjaan"
+          value={occupation}
+          onChangeText={setOccupation}
+          placeholder="Contoh: Ibu rumah tangga"
+        />
+      </FormSection>
+      <Button onPress={next}>Lanjut ke Data Kehamilan</Button>
     </Screen>
   );
 }

@@ -1,25 +1,34 @@
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { Button, Card, Screen, Title, ui } from '@/components/ui';
-import { respondentStyles as s } from '../lib/styles';
+import {
+  CompletionState,
+  completionStyles as s,
+} from '../components/completion-state';
 
 export function PosttestCompletedScreen() {
   return (
-    <Screen>
-      <Title>Materi Selesai</Title>
-      <Card>
-        <Text style={s.icon}>✓</Text>
-        <Text style={[s.cardTitle, { textAlign: 'center' }]}>
-          Posttest berhasil dikirim.
-        </Text>
-        <Text style={[ui.muted, { textAlign: 'center' }]}>
-          Materi berikutnya kini sudah terbuka. Hebat, lanjutkan sesuai waktu
-          Ibu.
-        </Text>
-      </Card>
-      <Button onPress={() => router.replace('/respondent/dashboard' as never)}>
-        Lihat Materi Berikutnya
-      </Button>
-    </Screen>
+    <CompletionState
+      eyebrow="MATERI SELESAI"
+      icon="✓"
+      title="Posttest berhasil dikirim"
+      description="Terima kasih sudah menyelesaikan seluruh rangkaian materi ini, Bu. Progres Ibu telah tersimpan."
+      detail={
+        <View style={s.unlockRow}>
+          <View style={s.unlockIcon}>
+            <Text style={s.unlockIconText}>⌑</Text>
+          </View>
+          <View style={s.unlockCopy}>
+            <Text style={s.unlockTitle}>Materi berikutnya terbuka</Text>
+            <Text style={s.unlockText}>
+              Ibu dapat melanjutkan belajar dari halaman beranda.
+            </Text>
+          </View>
+        </View>
+      }
+      note="Lanjutkan sesuai waktu dan kenyamanan Ibu. Setiap langkah kecil membantu menjaga ibu dan bayi."
+      actionLabel="Lihat Materi Berikutnya"
+      onAction={() => router.replace('/respondent/dashboard' as never)}
+      success
+    />
   );
 }

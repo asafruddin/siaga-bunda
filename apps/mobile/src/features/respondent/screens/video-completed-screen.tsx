@@ -1,38 +1,59 @@
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { Button, Card, Notice, Screen, Title, ui } from '@/components/ui';
+import { Button, Loading, Notice, Screen } from '@/components/ui';
 import { api } from '@/services/api';
 import { formatDateTime } from '../lib/format';
-import { respondentStyles as s } from '../lib/styles';
+import {
+  CompletionState,
+  completionStyles as s,
+} from '../components/completion-state';
 
 export function VideoCompletedScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const q = useQuery({
+  const query = useQuery({
     queryKey: ['video', id],
     queryFn: () => api<any>(`/videos/${id}`),
   });
-  const available = q.data?.progress?.available_at;
+
+  if (query.isLoading)
+    return (
+      <Screen>
+        <Loading />
+      </Screen>
+    );
+  if (query.error)
+    return (
+      <Screen>
+        <Notice
+          action={<Button onPress={() => query.refetch()}>Coba lagi</Button>}
+        >
+          {query.error.message}
+        </Notice>
+      </Screen>
+    );
+
+  const available = query.data?.progress?.available_at;
   return (
-    <Screen>
-      <Title>Video Selesai</Title>
-      <Card>
-        <Text style={s.icon}>♡</Text>
-        <Text style={[s.cardTitle, { textAlign: 'center' }]}>
-          Terima kasih sudah menonton sampai selesai.
-        </Text>
-        <Text style={[ui.muted, { textAlign: 'center' }]}>
-          {available
-            ? `Posttest tersedia pada ${formatDateTime(available)}.`
-            : 'Jadwal posttest sedang disiapkan.'}
-        </Text>
-      </Card>
-      <Notice>
-        Video berikutnya terbuka setelah posttest materi ini selesai.
-      </Notice>
-      <Button onPress={() => router.replace('/respondent/dashboard' as never)}>
-        Kembali ke Beranda
-      </Button>
-    </Screen>
+    <CompletionState
+      eyebrow="VIDEO SELESAI"
+      icon="♡"
+      title="Hebat, Ibu sudah menonton!"
+      description="Materi telah ditonton sampai selesai. Beri waktu untuk memahami informasi yang baru dipelajari."
+      detail={
+        <View style={s.detailHeading}>
+          <Text style={s.detailLabel}>POSTTEST TERSEDIA</Text>
+          <Text style={s.detailValue}>
+            {available ? formatDateTime(available) : 'Sedang dijadwalkan'}
+          </Text>
+          <Text style={s.detailHint}>
+            Kami akan mengingatkan Ibu saat waktunya tiba.
+          </Text>
+        </View>
+      }
+      note="Materi berikutnya akan terbuka setelah Ibu menyelesaikan posttest video ini."
+      actionLabel="Kembali ke Beranda"
+      onAction={() => router.replace('/respondent/dashboard' as never)}
+    />
   );
 }

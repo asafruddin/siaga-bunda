@@ -36,9 +36,12 @@ export function Screen({
         <Pressable
           accessibilityRole="button"
           onPress={() => router.back()}
-          style={s.back}
+          style={({ pressed }) => [s.back, pressed && { opacity: 0.55 }]}
         >
-          <Text style={s.backText}>← Kembali</Text>
+          <View style={s.backIcon}>
+            <Text style={s.backIconText}>‹</Text>
+          </View>
+          <Text style={s.backText}>Kembali</Text>
         </Pressable>
       ) : null}
       {body}
@@ -163,14 +166,31 @@ export function Notice({
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   back: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
     alignSelf: 'flex-start',
     marginHorizontal: 20,
     marginTop: 8,
     marginBottom: 4,
     paddingVertical: 6,
   },
-  backText: { fontSize: 16, fontWeight: '700', color: colors.primaryDark },
-  content: { padding: 20, gap: 16, flexGrow: 1 },
+  backIcon: {
+    width: 29,
+    height: 29,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.pink,
+  },
+  backIconText: {
+    marginTop: -2,
+    color: colors.primaryDark,
+    fontSize: 25,
+    lineHeight: 26,
+  },
+  backText: { fontSize: 14, fontWeight: '800', color: colors.primaryDark },
+  content: { padding: 20, paddingBottom: 36, gap: 16, flexGrow: 1 },
   title: { fontSize: 28, fontWeight: '800', color: colors.text },
   muted: { fontSize: 15, lineHeight: 22, color: colors.muted },
   label: { fontSize: 14, fontWeight: '700', color: colors.text },
