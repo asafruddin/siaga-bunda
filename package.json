@@ -8,6 +8,8 @@
     "typecheck": "turbo typecheck",
     "lint": "turbo lint",
     "test": "turbo test",
+    "build:android:preview": "pnpm --filter @siaga/mobile build:android:preview",
+    "build:android:production": "pnpm --filter @siaga/mobile build:android:production",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\""
   },
