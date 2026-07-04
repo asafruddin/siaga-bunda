@@ -27,7 +27,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/shared
       '@supabase/supabase-js':
-        specifier: ^2.50.0
+        specifier: 2.110.0
         version: 2.110.0
       hono:
         specifier: ^4.8.3
