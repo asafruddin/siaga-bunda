@@ -37,7 +37,10 @@ Run `pnpm typecheck` and `pnpm test`. API responses follow `{ success, data }` o
 
 ## Production checklist
 
+- Set the Vercel project **Root Directory** to `apps/api`.
+- Use **Framework Preset: Other**. Keep **Output Directory** as `public` (the repo includes an empty `apps/api/public` folder for Vercel).
+- Build command and install command are defined in `apps/api/vercel.json` for the pnpm monorepo.
+- Add API environment variables in Vercel: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY`, `JWT_SECRET`, `POSTTEST_DELAY_DAYS`, `ALLOWED_ORIGINS`.
 - Replace development JWT secrets and seeded video URLs.
-- Configure the Vercel environment variables for the API.
 - Review retention/deletion policy and researcher access before collecting real health data.
 - Test the native splash flow in release builds.
