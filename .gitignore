@@ -4,6 +4,7 @@ node_modules
 .expo
 dist
 .vercel
+apps/api/api/index.js
 *.log
 .DS_Store
 # Environment files — never commit secrets (.env.example is allowed)
