@@ -230,7 +230,7 @@ export function DashboardScreen() {
                 </View>
                 <Progress value={video.completion_percentage} />
               </View>
-              <Text style={styles.videoChevron}>{locked ? '⌑' : '›'}</Text>
+              <Text style={styles.videoChevron}>{locked ? '🔒' : '▶️'}</Text>
             </Pressable>
           );
         })}

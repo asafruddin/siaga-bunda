@@ -215,5 +215,6 @@ export const respondentStyles = StyleSheet.create({
     aspectRatio: 16 / 9,
     backgroundColor: '#171217',
     borderRadius: 18,
+    overflow: 'hidden',
   },
 });

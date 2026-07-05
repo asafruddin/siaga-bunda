@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StatusBar } from 'expo-status-bar';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import { useSession } from '@/services/session';
 import { colors } from '@/theme';
 const client = new QueryClient({
@@ -11,6 +12,9 @@ export default function Layout() {
   const hydrate = useSession((s) => s.hydrate);
   useEffect(() => {
     hydrate();
+    ScreenOrientation.lockAsync(
+      ScreenOrientation.OrientationLock.PORTRAIT_UP,
+    ).catch(() => {});
   }, [hydrate]);
   return (
     <QueryClientProvider client={client}>

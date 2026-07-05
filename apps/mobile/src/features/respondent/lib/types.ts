@@ -13,6 +13,22 @@ export type Video = {
   available_at?: string;
 };
 
+export type VideoProgress = {
+  max_watched_seconds: number;
+  duration_watched_seconds: number;
+  status: VideoStatus;
+};
+
+export type VideoDetail = {
+  id: string;
+  sequence_number: number;
+  title: string;
+  description: string;
+  video_url: string;
+  duration_seconds: number;
+  progress: VideoProgress;
+};
+
 export const videoStatusLabels: Record<VideoStatus, string> = {
   locked: 'Terkunci',
   pretest_required: 'Isi pretest',

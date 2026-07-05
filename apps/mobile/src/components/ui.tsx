@@ -12,6 +12,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { colors } from '../theme';
+import {
+  isNumericKeyboard,
+  normalizeNumericInput,
+} from '../lib/normalize-numeric-input';
 
 export function Screen({
   children,
@@ -97,8 +101,17 @@ export function Button({
 export function Field({
   label,
   error,
+  onChangeText,
+  keyboardType,
   ...props
 }: TextInputProps & { label: string; error?: string }) {
+  const handleChangeText = (text: string) => {
+    if (!onChangeText) return;
+    onChangeText(
+      isNumericKeyboard(keyboardType) ? normalizeNumericInput(text) : text,
+    );
+  };
+
   return (
     <View style={{ gap: 5 }}>
       <Text style={s.label}>{label}</Text>
@@ -106,6 +119,8 @@ export function Field({
         placeholderTextColor={colors.muted}
         style={[s.input, error && { borderColor: colors.danger }]}
         {...props}
+        keyboardType={keyboardType}
+        onChangeText={handleChangeText}
       />
       {error && <Text style={s.error}>{error}</Text>}
     </View>

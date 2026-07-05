@@ -1,19 +1,25 @@
-import { useEffect, useRef, useState } from 'react';
-import { Alert, AppState, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Alert, Modal, StyleSheet, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useVideoPlayer, VideoView } from 'expo-video';
+import * as ScreenOrientation from 'expo-screen-orientation';
+import { StatusBar } from 'expo-status-bar';
 import { Button, Loading, Notice, Progress, Screen } from '@/components/ui';
 import { api, post } from '@/services/api';
 import { colors } from '@/theme';
+import { VideoPlayerControls } from '../components/video-player-controls';
+import { formatVideoTime } from '../lib/format-time';
 import { respondentStyles as s } from '../lib/styles';
+import type { VideoDetail } from '../lib/types';
+import { useVideoWatchProgress } from '../lib/use-video-watch-progress';
 
 export function VideoPlayerScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const qc = useQueryClient();
   const q = useQuery({
     queryKey: ['video', id],
-    queryFn: () => api<any>(`/videos/${id}`),
+    queryFn: () => api<VideoDetail>(`/videos/${id}`),
   });
   if (q.isLoading)
     return (
@@ -40,87 +46,36 @@ export function VideoPlayerScreen() {
   );
 }
 
-function VideoPlayer({ video, onDone }: { video: any; onDone: () => void }) {
+function VideoPlayer({
+  video,
+  onDone,
+}: {
+  video: VideoDetail;
+  onDone: () => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [muted, setMuted] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
+
   const player = useVideoPlayer(video.video_url, (p) => {
     p.timeUpdateEventInterval = 1;
   });
-  const [max, setMax] = useState(
-    Number(video.progress.max_watched_seconds ?? 0),
-  );
-  const [watched, setWatched] = useState(
-    Number(video.progress.duration_watched_seconds ?? 0),
-  );
-  const [playing, setPlaying] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const maxRef = useRef(max);
-  const watchedRef = useRef(watched);
-  const playingRef = useRef(false);
-  const last = useRef(0);
-  const checkpoint = () =>
-    post(`/videos/${video.id}/progress`, {
-      currentSecond: player.currentTime,
-      maxWatchedSecond: maxRef.current,
-      durationWatchedSeconds: watchedRef.current,
-    });
-  useEffect(() => {
-    player.currentTime = max;
-    post(`/videos/${video.id}/start`).catch((e) =>
-      Alert.alert('Video belum dapat dimulai', e.message),
-    );
-    const sub = player.addListener('timeUpdate', ({ currentTime }) => {
-      if (currentTime > maxRef.current + 2) {
-        player.currentTime = maxRef.current;
-        return;
-      }
-      if (
-        playingRef.current &&
-        currentTime >= last.current &&
-        currentTime - last.current <= 2
-      ) {
-        watchedRef.current = Math.min(
-          video.duration_seconds,
-          watchedRef.current + (currentTime - last.current),
-        );
-        setWatched(watchedRef.current);
-      }
-      if (currentTime > maxRef.current) {
-        maxRef.current = currentTime;
-        setMax(currentTime);
-      }
-      last.current = currentTime;
-    });
-    return () => sub.remove();
-  }, [player, video.id]);
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (playingRef.current) checkpoint().catch(() => {});
-    }, 10000);
-    const state = AppState.addEventListener('change', (next) => {
-      if (next !== 'active' && playingRef.current) {
-        player.pause();
-        playingRef.current = false;
-        setPlaying(false);
-        checkpoint().catch(() => {});
-      }
-    });
-    return () => {
-      clearInterval(timer);
-      state.remove();
-      checkpoint().catch(() => {});
-    };
-  }, [player, video.id]);
-  async function toggle() {
-    if (playing) {
-      player.pause();
-      playingRef.current = false;
-      setPlaying(false);
-      await checkpoint().catch(() => {});
-    } else {
-      player.play();
-      playingRef.current = true;
-      setPlaying(true);
-    }
-  }
+
+  const {
+    max,
+    watched,
+    currentTime,
+    playing,
+    completed,
+    percentage,
+    checkpoint,
+    toggle,
+    seekTo,
+    skipBackward,
+    skipForward,
+  } = useVideoWatchProgress({ player, video });
+
   async function finish() {
     try {
       setBusy(true);
@@ -136,11 +91,37 @@ function VideoPlayer({ video, onDone }: { video: any; onDone: () => void }) {
       setBusy(false);
     }
   }
-  const completed =
-    max >= video.duration_seconds - 2 &&
-    watched >= video.duration_seconds * 0.9;
-  const percentage = Math.min(100, (max / video.duration_seconds) * 100);
+
+  async function enterCustomFullscreen() {
+    setFullscreen(true);
+    await ScreenOrientation.lockAsync(
+      ScreenOrientation.OrientationLock.LANDSCAPE,
+    ).catch(() => {});
+  }
+
+  async function exitCustomFullscreen() {
+    setFullscreen(false);
+    await ScreenOrientation.lockAsync(
+      ScreenOrientation.OrientationLock.PORTRAIT_UP,
+    ).catch(() => {});
+  }
+
+  useEffect(
+    () => () => {
+      try {
+        player.pause();
+      } catch {
+        // Native player already released.
+      }
+      ScreenOrientation.lockAsync(
+        ScreenOrientation.OrientationLock.PORTRAIT_UP,
+      ).catch(() => {});
+    },
+    [player],
+  );
+
   const remaining = Math.max(0, video.duration_seconds - max);
+
   return (
     <Screen>
       <View style={styles.heading}>
@@ -154,19 +135,95 @@ function VideoPlayer({ video, onDone }: { video: any; onDone: () => void }) {
       </View>
 
       <View style={styles.playerFrame}>
-        <VideoView
-          player={player}
-          style={s.video}
-          nativeControls={false}
-          contentFit="contain"
-        />
-        <View style={styles.playerStatus}>
-          <View style={styles.liveDot} />
-          <Text style={styles.playerStatusText}>
-            {playing ? 'Sedang diputar' : 'Dijeda'}
-          </Text>
-        </View>
+        {!fullscreen ? (
+          <VideoView
+            player={player}
+            style={s.video}
+            nativeControls={false}
+            contentFit="contain"
+            requiresLinearPlayback
+            allowsVideoFrameAnalysis={false}
+            surfaceType="textureView"
+            fullscreenOptions={{ enable: false }}
+            onFirstFrameRender={() => setLoading(false)}
+          />
+        ) : null}
+        {!fullscreen ? (
+          <VideoPlayerControls
+            currentTime={currentTime}
+            duration={video.duration_seconds}
+            maxWatched={max}
+            playing={playing}
+            muted={muted}
+            loading={loading}
+            onTogglePlay={toggle}
+            onSkipBackward={() => skipBackward()}
+            onSkipForward={() => skipForward()}
+            onSeek={seekTo}
+            onToggleMute={() => {
+              const next = !muted;
+              try {
+                player.muted = next;
+              } catch {
+                // Native player already released.
+              }
+              setMuted(next);
+            }}
+            onFullscreen={enterCustomFullscreen}
+          />
+        ) : null}
       </View>
+
+      <Modal
+        visible={fullscreen}
+        animationType="fade"
+        presentationStyle="fullScreen"
+        supportedOrientations={[
+          'landscape',
+          'landscape-left',
+          'landscape-right',
+        ]}
+        statusBarTranslucent
+        onRequestClose={exitCustomFullscreen}
+      >
+        <View style={styles.fullscreenRoot}>
+          <StatusBar hidden />
+          <VideoView
+            player={player}
+            style={styles.fullscreenVideo}
+            nativeControls={false}
+            contentFit="contain"
+            requiresLinearPlayback
+            allowsVideoFrameAnalysis={false}
+            surfaceType="textureView"
+            fullscreenOptions={{ enable: false }}
+            onFirstFrameRender={() => setLoading(false)}
+          />
+          <VideoPlayerControls
+            currentTime={currentTime}
+            duration={video.duration_seconds}
+            maxWatched={max}
+            playing={playing}
+            muted={muted}
+            loading={loading}
+            onTogglePlay={toggle}
+            onSkipBackward={() => skipBackward()}
+            onSkipForward={() => skipForward()}
+            onSeek={seekTo}
+            onToggleMute={() => {
+              const next = !muted;
+              try {
+                player.muted = next;
+              } catch {
+                // Native player already released.
+              }
+              setMuted(next);
+            }}
+            onFullscreen={exitCustomFullscreen}
+            fullscreen
+          />
+        </View>
+      </Modal>
 
       <View style={styles.watchCard}>
         <View style={styles.watchHeading}>
@@ -176,42 +233,27 @@ function VideoPlayer({ video, onDone }: { video: any; onDone: () => void }) {
           </View>
           <View style={styles.timePill}>
             <Text style={styles.timePillText}>
-              {Math.floor(remaining)} detik tersisa
+              {formatVideoTime(remaining)} tersisa
             </Text>
           </View>
         </View>
         <Progress value={percentage} />
         <View style={styles.watchStats}>
           <Text style={styles.watchStatText}>
-            Posisi {Math.floor(max)} detik
+            Posisi {formatVideoTime(max)}
           </Text>
           <Text style={styles.watchStatText}>
-            Ditonton {Math.floor(watched)} detik
+            Ditonton {formatVideoTime(watched)}
           </Text>
-        </View>
-      </View>
-
-      <View style={{ flexDirection: 'row', gap: 10 }}>
-        <View style={{ flex: 1 }}>
-          <Button
-            variant="secondary"
-            onPress={() => {
-              player.currentTime = Math.max(0, player.currentTime - 10);
-            }}
-          >
-            ↶ 10 detik
-          </Button>
-        </View>
-        <View style={{ flex: 1 }}>
-          <Button onPress={toggle}>{playing ? 'Ⅱ Jeda' : '▶ Putar'}</Button>
         </View>
       </View>
 
       <View style={styles.noSkipNote}>
         <Text style={styles.noSkipIcon}>⌾</Text>
         <Text style={styles.noSkipText}>
-          Bagian yang belum ditonton tidak dapat dilewati. Ibu tetap dapat
-          mengulang bagian sebelumnya atau menjeda video kapan saja.
+          Bagian yang belum ditonton tidak dapat dilewati, termasuk saat
+          menggeser bilah waktu. Ibu tetap dapat mengulang bagian sebelumnya
+          atau menjeda video kapan saja.
         </Text>
       </View>
 
@@ -249,6 +291,8 @@ const styles = StyleSheet.create({
   },
   subtitle: { color: colors.muted, fontSize: 12, lineHeight: 18 },
   playerFrame: {
+    position: 'relative',
+    overflow: 'hidden',
     padding: 5,
     borderRadius: 22,
     backgroundColor: '#211820',
@@ -258,20 +302,14 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     elevation: 4,
   },
-  playerStatus: {
-    position: 'absolute',
-    top: 14,
-    left: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 8,
-    paddingVertical: 5,
-    borderRadius: 99,
-    backgroundColor: 'rgba(0,0,0,0.58)',
+  fullscreenRoot: {
+    flex: 1,
+    position: 'relative',
+    backgroundColor: 'black',
   },
-  liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#F28AAC' },
-  playerStatusText: { color: 'white', fontSize: 8, fontWeight: '800' },
+  fullscreenVideo: {
+    ...StyleSheet.absoluteFill,
+  },
   watchCard: {
     gap: 12,
     padding: 15,

@@ -1,8 +1,12 @@
 {
   "cli": {
-    "version": ">= 15.0.0"
+    "version": ">= 15.0.0",
+    "appVersionSource": "remote"
   },
   "build": {
+    "base": {
+      "node": "22.13.0"
+    },
     "development": {
       "developmentClient": true,
       "distribution": "internal",
