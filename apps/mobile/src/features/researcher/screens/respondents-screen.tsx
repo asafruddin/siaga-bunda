@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { router } from 'expo-router';
 import {
   Badge,
   Button,
@@ -11,8 +13,8 @@ import {
   Progress,
   Screen,
 } from '@/components/ui';
-import { colors } from '@/theme';
 import { api } from '@/services/api';
+import { colors } from '@/theme';
 import { formatDate } from '../lib/format';
 import { statusLabel } from '../lib/status-label';
 import { researcherStyles as s } from '../lib/styles';
@@ -50,7 +52,12 @@ export function RespondentsScreen() {
       <View style={s.pageHeading}>
         <View style={s.pageEyebrowRow}>
           <View style={s.pageIconBox}>
-            <Text style={s.pageIconText}>●●</Text>
+            <MaterialCommunityIcons
+              accessible={false}
+              color={colors.primaryDark}
+              name="account-group-outline"
+              size={19}
+            />
           </View>
           <Text style={s.pageEyebrow}>DATA PENELITIAN</Text>
         </View>
@@ -191,7 +198,12 @@ export function RespondentsScreen() {
                     </View>
                     <Progress value={progress} />
                   </View>
-                  <Text style={s.rowChevron}>›</Text>
+                  <Ionicons
+                    accessible={false}
+                    color={colors.primary}
+                    name="chevron-forward"
+                    size={21}
+                  />
                 </Pressable>
               );
             })}
@@ -200,6 +212,7 @@ export function RespondentsScreen() {
           <View style={s.paginationCard}>
             <Pressable
               accessibilityRole="button"
+              accessibilityLabel="Halaman sebelumnya"
               disabled={page <= 1}
               onPress={() => setPage((current) => current - 1)}
               style={({ pressed }) => [
@@ -208,7 +221,12 @@ export function RespondentsScreen() {
                 pressed && { opacity: 0.55 },
               ]}
             >
-              <Text style={s.paginationButtonText}>‹</Text>
+              <Ionicons
+                accessible={false}
+                color={colors.primaryDark}
+                name="chevron-back"
+                size={20}
+              />
             </Pressable>
             <View style={s.paginationLabel}>
               <Text style={s.paginationCurrent}>Halaman {page}</Text>
@@ -218,6 +236,7 @@ export function RespondentsScreen() {
             </View>
             <Pressable
               accessibilityRole="button"
+              accessibilityLabel="Halaman berikutnya"
               disabled={page >= (q.data.totalPages ?? 1)}
               onPress={() => setPage((current) => current + 1)}
               style={({ pressed }) => [
@@ -226,14 +245,24 @@ export function RespondentsScreen() {
                 pressed && { opacity: 0.55 },
               ]}
             >
-              <Text style={s.paginationButtonText}>›</Text>
+              <Ionicons
+                accessible={false}
+                color={colors.primaryDark}
+                name="chevron-forward"
+                size={20}
+              />
             </Pressable>
           </View>
         </>
       ) : (
         <View style={s.emptyState}>
           <View style={[s.emptyStateIcon, { backgroundColor: colors.purple }]}>
-            <Text style={s.emptyStateIconText}>⌕</Text>
+            <MaterialCommunityIcons
+              accessible={false}
+              color={colors.primaryDark}
+              name="account-search-outline"
+              size={29}
+            />
           </View>
           <Text style={s.emptyStateTitle}>Responden tidak ditemukan</Text>
           <Text style={s.emptyStateText}>

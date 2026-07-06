@@ -17,6 +17,8 @@ import {
   fail,
   issueToken,
   ok,
+  posttestDelayMs,
+  maxActiveVideoSequence,
   researcher,
   row,
 } from './lib.js';
@@ -287,8 +289,42 @@ async function refreshAvailability(progress: any) {
   return progress;
 }
 
+async function unlockNextVideo(
+  client: ReturnType<typeof db>,
+  respondentId: string,
+  currentSequence: number,
+  userId?: string,
+) {
+  const next = row(
+    await client
+      .from('videos')
+      .select('id')
+      .eq('sequence_number', currentSequence + 1)
+      .eq('is_active', true)
+      .maybeSingle(),
+  ) as { id: string } | null;
+  if (!next) return null;
+  await client.from('video_progress').upsert(
+    {
+      respondent_id: respondentId,
+      video_id: next.id,
+      status: 'pretest_required',
+    },
+    { onConflict: 'respondent_id,video_id' },
+  );
+  await audit('next_video_unlocked', userId, respondentId, next.id);
+  return next;
+}
+
+async function isLastActiveVideo(video: { sequence_number: number }) {
+  const maxSequence = await maxActiveVideoSequence(db());
+  return video.sequence_number === maxSequence;
+}
+
 app.get('/videos', auth, async (c) => {
   const respondent = await respondentFor(c.get('user').id);
+  const client = db();
+  const maxSequence = await maxActiveVideoSequence(client);
   const videos = row(
     await db()
       .from('videos')
@@ -313,6 +349,7 @@ app.get('/videos', auth, async (c) => {
         completion_percentage: Number(p?.completion_percentage ?? 0),
         max_watched_seconds: p?.max_watched_seconds ?? 0,
         available_at: p?.available_at,
+        is_last_video: video.sequence_number === maxSequence,
       };
     }),
   );
@@ -335,10 +372,14 @@ app.get('/videos/:id', auth, async (c) => {
     return fail(
       c,
       'VIDEO_LOCKED',
-      'Selesaikan posttest video sebelumnya terlebih dahulu.',
+      'Selesaikan materi sebelumnya terlebih dahulu.',
       403,
     );
-  return ok(c, { ...video, progress });
+  return ok(c, {
+    ...video,
+    progress,
+    is_last_video: await isLastActiveVideo(video),
+  });
 });
 
 app.post('/videos/:id/start', auth, async (c) => {
@@ -468,15 +509,53 @@ app.post('/videos/:id/complete', auth, async (c) => {
     ['waiting_posttest', 'posttest_available', 'completed'].includes(p.status)
   )
     return ok(c, p);
-  const available = new Date(
-    Date.now() + Number(process.env.POSTTEST_DELAY_DAYS ?? 7) * 86400000,
-  ).toISOString();
+
   const client = db();
+  const lastVideo = await isLastActiveVideo(video);
+
+  if (lastVideo) {
+    const available = new Date(Date.now() + posttestDelayMs()).toISOString();
+    const updated = row(
+      await client
+        .from('video_progress')
+        .update({
+          status: 'waiting_posttest',
+          completion_percentage: 100,
+          watch_completed_at: new Date().toISOString(),
+        })
+        .eq('id', p.id)
+        .select('*')
+        .single(),
+    );
+    await client.from('posttest_schedules').upsert(
+      {
+        respondent_id: respondent.id,
+        video_id: video.id,
+        available_at: available,
+        status: 'scheduled',
+      },
+      { onConflict: 'respondent_id,video_id' },
+    );
+    await audit('video_completed', c.get('user').id, respondent.id, video.id);
+    await audit(
+      'posttest_scheduled',
+      c.get('user').id,
+      respondent.id,
+      video.id,
+      { availableAt: available },
+    );
+    return ok(c, {
+      progress: updated,
+      availableAt: available,
+      requiresPosttest: true,
+    });
+  }
+
   const updated = row(
     await client
       .from('video_progress')
       .update({
-        status: 'waiting_posttest',
+        status: 'completed',
         completion_percentage: 100,
         watch_completed_at: new Date().toISOString(),
       })
@@ -484,20 +563,14 @@ app.post('/videos/:id/complete', auth, async (c) => {
       .select('*')
       .single(),
   );
-  await client.from('posttest_schedules').upsert(
-    {
-      respondent_id: respondent.id,
-      video_id: video.id,
-      available_at: available,
-      status: 'scheduled',
-    },
-    { onConflict: 'respondent_id,video_id' },
+  await unlockNextVideo(
+    client,
+    respondent.id,
+    video.sequence_number,
+    c.get('user').id,
   );
   await audit('video_completed', c.get('user').id, respondent.id, video.id);
-  await audit('posttest_scheduled', c.get('user').id, respondent.id, video.id, {
-    availableAt: available,
-  });
-  return ok(c, { progress: updated, availableAt: available });
+  return ok(c, { progress: updated, requiresPosttest: false });
 });
 
 async function getQuestions(videoId: string, type: 'pretest' | 'posttest') {
@@ -531,8 +604,23 @@ app.get('/videos/:id/pretest', auth, async (c) => {
 });
 app.get('/videos/:id/posttest', auth, async (c) => {
   const respondent = await respondentFor(c.get('user').id);
+  const videoId = c.req.param('id')!;
+  const video = row(
+    await db()
+      .from('videos')
+      .select('sequence_number')
+      .eq('id', videoId)
+      .single(),
+  ) as { sequence_number: number };
+  if (!(await isLastActiveVideo(video)))
+    return fail(
+      c,
+      'POSTTEST_NOT_AVAILABLE',
+      'Posttest hanya tersedia setelah menonton video terakhir.',
+      403,
+    );
   const p = await refreshAvailability(
-    await progressFor(respondent.id, c.req.param('id')!),
+    await progressFor(respondent.id, videoId),
   );
   if (!p || p.status !== 'posttest_available')
     return fail(
@@ -541,16 +629,31 @@ app.get('/videos/:id/posttest', auth, async (c) => {
       `Posttest belum tersedia${p?.available_at ? ` sampai ${p.available_at}` : ''}.`,
       403,
     );
-  return ok(c, await getQuestions(c.req.param('id')!, 'posttest'));
+  return ok(c, await getQuestions(videoId, 'posttest'));
 });
 async function submitTest(c: any, type: 'pretest' | 'posttest') {
   const parsed = testSubmissionSchema.safeParse(await c.req.json());
   if (!parsed.success)
     return fail(c, 'VALIDATION_ERROR', 'Semua pertanyaan wajib dijawab.');
   const respondent = await respondentFor(c.get('user').id);
-  let p = await refreshAvailability(
-    await progressFor(respondent.id, c.req.param('id')),
-  );
+  const videoId = c.req.param('id');
+  if (type === 'posttest') {
+    const video = row(
+      await db()
+        .from('videos')
+        .select('sequence_number')
+        .eq('id', videoId)
+        .single(),
+    ) as { sequence_number: number };
+    if (!(await isLastActiveVideo(video)))
+      return fail(
+        c,
+        'POSTTEST_NOT_AVAILABLE',
+        'Posttest hanya tersedia setelah menonton video terakhir.',
+        403,
+      );
+  }
+  let p = await refreshAvailability(await progressFor(respondent.id, videoId));
   const expected =
     type === 'pretest' ? 'pretest_required' : 'posttest_available';
   if (!p || p.status !== expected)
@@ -622,38 +725,7 @@ async function submitTest(c: any, type: 'pretest' | 'posttest') {
       .from('posttest_schedules')
       .update({ status: 'completed' })
       .eq('respondent_id', respondent.id)
-      .eq('video_id', c.req.param('id'));
-    const current = row(
-      await client
-        .from('videos')
-        .select('sequence_number')
-        .eq('id', c.req.param('id'))
-        .single(),
-    ) as any;
-    const next = row(
-      await client
-        .from('videos')
-        .select('id')
-        .eq('sequence_number', current.sequence_number + 1)
-        .eq('is_active', true)
-        .maybeSingle(),
-    ) as any;
-    if (next) {
-      await client.from('video_progress').upsert(
-        {
-          respondent_id: respondent.id,
-          video_id: next.id,
-          status: 'pretest_required',
-        },
-        { onConflict: 'respondent_id,video_id' },
-      );
-      await audit(
-        'next_video_unlocked',
-        c.get('user').id,
-        respondent.id,
-        next.id,
-      );
-    }
+      .eq('video_id', videoId);
   }
   await audit(
     `${type}_submitted`,

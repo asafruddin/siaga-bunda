@@ -1,6 +1,5 @@
-import { Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { colors } from '@/theme';
-import { StyleSheet } from 'react-native';
 
 export function SectionTitle({ title, hint }: { title: string; hint: string }) {
   return (

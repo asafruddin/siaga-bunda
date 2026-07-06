@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Button, Screen } from '@/components/ui';
 import { colors } from '@/theme';
 
@@ -15,7 +16,7 @@ export function CompletionState({
   success = false,
 }: {
   eyebrow: string;
-  icon: string;
+  icon: ReactNode;
   title: string;
   description: string;
   detail?: ReactNode;
@@ -43,15 +44,18 @@ export function CompletionState({
       <View style={[styles.hero, success && { backgroundColor: '#245E49' }]}>
         <View style={styles.ringLarge} />
         <View style={styles.ringSmall} />
-        <View style={styles.iconBox}>
-          <Text style={styles.icon}>{icon}</Text>
-        </View>
+        <View style={styles.iconBox}>{icon}</View>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.description}>{description}</Text>
       </View>
       {detail ? <View style={styles.detailCard}>{detail}</View> : null}
       <View style={styles.note}>
-        <Text style={styles.noteIcon}>⌾</Text>
+        <MaterialCommunityIcons
+          accessible={false}
+          color={colors.primaryDark}
+          name="information-outline"
+          size={18}
+        />
         <Text style={styles.noteText}>{note}</Text>
       </View>
       <Button onPress={onAction}>{actionLabel}</Button>
@@ -83,7 +87,6 @@ export const completionStyles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#DDF4E8',
   },
-  unlockIconText: { color: colors.success, fontSize: 17, fontWeight: '900' },
   unlockCopy: { flex: 1, gap: 2 },
   unlockTitle: { color: colors.text, fontSize: 13, fontWeight: '900' },
   unlockText: { color: colors.muted, fontSize: 10, lineHeight: 15 },
@@ -137,7 +140,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.15)',
   },
-  icon: { color: 'white', fontSize: 42, fontWeight: '300' },
   title: {
     color: 'white',
     fontSize: 27,
@@ -167,6 +169,5 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     backgroundColor: colors.blue,
   },
-  noteIcon: { color: colors.primaryDark, fontSize: 16, fontWeight: '900' },
   noteText: { flex: 1, color: colors.muted, fontSize: 10, lineHeight: 15 },
 });

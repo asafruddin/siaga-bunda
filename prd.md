@@ -336,7 +336,7 @@ Each video requires pretest before video opens.
 Content:
 
 - Pretest intro screen.
-- 10 multiple-choice questions.
+- 5 meeting-specific multiple-choice questions.
 - One answer per question.
 - Submit confirmation.
 - Score calculation.
@@ -344,7 +344,7 @@ Content:
 Acceptance criteria:
 
 - User cannot open video before pretest.
-- User can answer 10 questions.
+- User can answer 5 questions.
 - User cannot submit incomplete pretest.
 - System calculates score automatically.
 - System stores answers and score.
@@ -396,7 +396,7 @@ Posttest becomes available after 7 days.
 Content:
 
 - Posttest intro.
-- 10 multiple-choice questions.
+- 25 multiple-choice questions shared across all seven meetings.
 - Submit button.
 - Score result.
 - Next video unlock information.
@@ -667,11 +667,17 @@ Score is calculated as:
 
 Correct answers / total questions × 100
 
-For 10 questions:
+For 5 pretest questions:
 
-- 10 correct = 100
-- 8 correct = 80
-- 5 correct = 50
+- 5 correct = 100
+- 4 correct = 80
+- 3 correct = 60
+
+For 25 posttest questions:
+
+- 25 correct = 100
+- 20 correct = 80
+- 15 correct = 60
 
 ## BR-010: Audit Trail
 

@@ -1,6 +1,9 @@
+import { useCallback } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { router } from 'expo-router';
 import {
   Badge,
   Button,
@@ -24,6 +27,15 @@ export function DashboardScreen() {
     queryKey: ['videos'],
     queryFn: () => api<Video[]>('/videos'),
   });
+
+  const refresh = useCallback(async () => {
+    await Promise.all([
+      queryClient.refetchQueries({ queryKey: ['profile'] }),
+      queryClient.refetchQueries({ queryKey: ['videos'] }),
+    ]);
+  }, [queryClient]);
+
+  const refreshing = profile.isRefetching || videos.isRefetching;
 
   if (profile.isLoading || videos.isLoading)
     return (
@@ -75,7 +87,7 @@ export function DashboardScreen() {
     if (video.status === 'locked') {
       Alert.alert(
         'Materi masih terkunci',
-        'Selesaikan posttest materi sebelumnya untuk membuka video ini.',
+        'Selesaikan materi sebelumnya untuk membuka video ini.',
       );
       return;
     }
@@ -83,7 +95,7 @@ export function DashboardScreen() {
   };
 
   return (
-    <Screen showBack={false}>
+    <Screen onRefresh={refresh} refreshing={refreshing} showBack={false}>
       <View style={styles.topbar}>
         <View>
           <Text style={styles.greetingEyebrow}>SELAMAT DATANG</Text>
@@ -105,7 +117,12 @@ export function DashboardScreen() {
 
       <View style={styles.pregnancyCard}>
         <View style={styles.pregnancyIcon}>
-          <Text style={styles.pregnancyIconText}>♡</Text>
+          <MaterialCommunityIcons
+            accessible={false}
+            color="white"
+            name="human-pregnant"
+            size={31}
+          />
         </View>
         <View style={styles.pregnancyCopy}>
           <Text style={styles.pregnancyLabel}>USIA KEHAMILAN</Text>
@@ -141,7 +158,12 @@ export function DashboardScreen() {
             ]}
           >
             <View style={styles.nextActionIcon}>
-              <Text style={styles.nextActionIconText}>▶</Text>
+              <Ionicons
+                accessible={false}
+                color="white"
+                name="play"
+                size={15}
+              />
             </View>
             <View style={styles.nextActionCopy}>
               <Text style={styles.nextActionEyebrow}>LANGKAH BERIKUTNYA</Text>
@@ -149,11 +171,21 @@ export function DashboardScreen() {
                 {videoStatusLabels[next.status]} • Video {next.sequence_number}
               </Text>
             </View>
-            <Text style={styles.nextActionChevron}>›</Text>
+            <Ionicons
+              accessible={false}
+              color={colors.primaryDark}
+              name="chevron-forward"
+              size={21}
+            />
           </Pressable>
         ) : completed === list.length && list.length ? (
           <View style={styles.completeMessage}>
-            <Text style={styles.completeMessageIcon}>✓</Text>
+            <Ionicons
+              accessible={false}
+              color={colors.success}
+              name="checkmark-circle"
+              size={17}
+            />
             <Text style={styles.completeMessageText}>
               Selamat, seluruh program edukasi telah selesai!
             </Text>
@@ -168,8 +200,15 @@ export function DashboardScreen() {
             Selesaikan materi secara berurutan
           </Text>
         </View>
-        <Pressable onPress={() => queryClient.invalidateQueries()}>
-          <Text style={styles.refreshText}>Perbarui</Text>
+        <Pressable
+          accessibilityRole="button"
+          disabled={refreshing}
+          onPress={refresh}
+          style={({ pressed }) => pressed && { opacity: 0.6 }}
+        >
+          <Text style={styles.refreshText}>
+            {refreshing ? 'Memperbarui…' : 'Perbarui'}
+          </Text>
         </Pressable>
       </View>
 
@@ -194,14 +233,18 @@ export function DashboardScreen() {
                   locked && styles.videoNumberLocked,
                 ]}
               >
-                <Text
-                  style={[
-                    styles.videoNumberText,
-                    video.status === 'completed' && { color: 'white' },
-                  ]}
-                >
-                  {video.status === 'completed' ? '✓' : video.sequence_number}
-                </Text>
+                {video.status === 'completed' ? (
+                  <Ionicons
+                    accessible={false}
+                    color="white"
+                    name="checkmark"
+                    size={19}
+                  />
+                ) : (
+                  <Text style={styles.videoNumberText}>
+                    {video.sequence_number}
+                  </Text>
+                )}
               </View>
               <View style={styles.videoContent}>
                 <View style={styles.videoTitleRow}>
@@ -222,7 +265,9 @@ export function DashboardScreen() {
                   <Badge tone={videoStatusTone(video.status)}>
                     {videoStatusLabels[video.status]}
                   </Badge>
-                  {video.status === 'waiting_posttest' && video.available_at ? (
+                  {video.is_last_video &&
+                  video.status === 'waiting_posttest' &&
+                  video.available_at ? (
                     <Text style={styles.availableText}>
                       {formatDateTime(video.available_at)}
                     </Text>
@@ -230,7 +275,12 @@ export function DashboardScreen() {
                 </View>
                 <Progress value={video.completion_percentage} />
               </View>
-              <Text style={styles.videoChevron}>{locked ? '🔒' : '▶️'}</Text>
+              <Ionicons
+                accessible={false}
+                color={locked ? colors.muted : colors.primary}
+                name={locked ? 'lock-closed' : 'play-circle'}
+                size={22}
+              />
             </Pressable>
           );
         })}
@@ -286,7 +336,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.13)',
   },
-  pregnancyIconText: { color: 'white', fontSize: 30 },
   pregnancyCopy: { flex: 1 },
   pregnancyLabel: {
     color: '#EFCFDE',
@@ -336,7 +385,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.primary,
   },
-  nextActionIconText: { color: 'white', fontSize: 12 },
   nextActionCopy: { flex: 1, gap: 2 },
   nextActionEyebrow: {
     color: colors.primary,
@@ -349,7 +397,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '800',
   },
-  nextActionChevron: { color: colors.primaryDark, fontSize: 24 },
   completeMessage: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -358,7 +405,6 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     backgroundColor: '#DDF4E8',
   },
-  completeMessageIcon: { color: colors.success, fontWeight: '900' },
   completeMessageText: {
     flex: 1,
     color: colors.success,
@@ -435,5 +481,4 @@ const styles = StyleSheet.create({
     fontSize: 8,
     textAlign: 'right',
   },
-  videoChevron: { color: colors.primary, fontSize: 23 },
 });

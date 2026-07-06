@@ -1,23 +1,33 @@
 import { Text, View } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Button, Screen } from '@/components/ui';
 import { colors } from '@/theme';
 import { respondentStyles as s } from '../lib/styles';
 
-const instructions = [
-  ['1', 'Jawab semua pertanyaan', 'Terdapat 10 pertanyaan pilihan ganda.'],
-  ['2', 'Pilih satu jawaban', 'Pilih jawaban yang menurut Ibu paling tepat.'],
-  ['3', 'Kirim setelah lengkap', 'Nilai dihitung otomatis oleh sistem.'],
-];
-
 export function TestIntroScreen({ type }: { type: 'pretest' | 'posttest' }) {
   const { id } = useLocalSearchParams<{ id: string }>();
   const isPretest = type === 'pretest';
+  const questionCount = isPretest ? 5 : 25;
+  const duration = isPretest ? 'sekitar 3 menit' : 'sekitar 10–15 menit';
+  const instructions = [
+    [
+      '1',
+      'Jawab semua pertanyaan',
+      `Terdapat ${questionCount} pertanyaan pilihan ganda.`,
+    ],
+    ['2', 'Pilih satu jawaban', 'Pilih jawaban yang menurut Ibu paling tepat.'],
+    ['3', 'Kirim setelah lengkap', 'Nilai dihitung otomatis oleh sistem.'],
+  ];
   return (
     <Screen>
       <View style={s.testIntroHeading}>
         <View
-          style={[s.testTypePill, !isPretest && { backgroundColor: '#E2F2E9' }]}
+          style={[
+            s.testTypePill,
+            !isPretest && { backgroundColor: colors.successSoft },
+          ]}
         >
           <Text
             style={[
@@ -39,13 +49,21 @@ export function TestIntroScreen({ type }: { type: 'pretest' | 'posttest' }) {
       </View>
 
       <View
-        style={[s.testIntroHero, !isPretest && { backgroundColor: '#245E49' }]}
+        style={[
+          s.testIntroHero,
+          !isPretest && { backgroundColor: colors.successDark },
+        ]}
       >
         <View style={s.testIntroHeroIcon}>
-          <Text style={s.testIntroHeroIconText}>{isPretest ? 'A' : '✓'}</Text>
+          <MaterialIcons
+            accessible={false}
+            color="white"
+            name={isPretest ? 'quiz' : 'fact-check'}
+            size={24}
+          />
         </View>
-        <Text style={s.testIntroHeroValue}>10</Text>
-        <Text style={s.testIntroHeroLabel}>pertanyaan • sekitar 5 menit</Text>
+        <Text style={s.testIntroHeroValue}>{questionCount}</Text>
+        <Text style={s.testIntroHeroLabel}>pertanyaan • {duration}</Text>
       </View>
 
       <View style={s.instructionCard}>
@@ -70,17 +88,21 @@ export function TestIntroScreen({ type }: { type: 'pretest' | 'posttest' }) {
       </View>
 
       <View
-        style={[s.testNotice, !isPretest && { backgroundColor: '#E8F4ED' }]}
+        style={[
+          s.testNotice,
+          !isPretest && { backgroundColor: colors.successMuted },
+        ]}
       >
-        <Text
-          style={[s.testNoticeIcon, !isPretest && { color: colors.success }]}
-        >
-          {isPretest ? '▶' : '◷'}
-        </Text>
+        <Ionicons
+          accessible={false}
+          color={isPretest ? colors.primary : colors.success}
+          name={isPretest ? 'play-circle-outline' : 'time-outline'}
+          size={18}
+        />
         <Text style={s.testNoticeText}>
           {isPretest
             ? 'Video akan terbuka segera setelah pretest selesai dikirim.'
-            : 'Posttest tersedia tujuh hari setelah video selesai ditonton.'}
+            : 'Posttest tersedia setelah menonton video terakhir.'}
         </Text>
       </View>
 

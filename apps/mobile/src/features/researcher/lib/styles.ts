@@ -12,7 +12,6 @@ export const researcherStyles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.pink,
   },
-  pageIconText: { color: colors.primaryDark, fontSize: 13, fontWeight: '900' },
   pageEyebrow: {
     color: colors.primary,
     fontSize: 10,
@@ -127,7 +126,6 @@ export const researcherStyles = StyleSheet.create({
     gap: 8,
   },
   videoCountText: { color: colors.muted, fontSize: 10, fontWeight: '700' },
-  rowChevron: { color: colors.primary, fontSize: 26, fontWeight: '300' },
   paginationCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -146,11 +144,6 @@ export const researcherStyles = StyleSheet.create({
     borderColor: colors.primary,
   },
   paginationDisabled: { opacity: 0.32 },
-  paginationButtonText: {
-    color: colors.primaryDark,
-    fontSize: 25,
-    lineHeight: 28,
-  },
   paginationLabel: { minWidth: 88, alignItems: 'center' },
   paginationCurrent: { color: colors.text, fontSize: 13, fontWeight: '800' },
   paginationTotal: { color: colors.muted, fontSize: 10 },
@@ -170,11 +163,6 @@ export const researcherStyles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  emptyStateIconText: {
-    color: colors.primaryDark,
-    fontSize: 23,
-    fontWeight: '900',
   },
   emptyStateTitle: { color: colors.text, fontSize: 16, fontWeight: '900' },
   emptyStateText: {
@@ -385,7 +373,6 @@ export const researcherStyles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.14)',
   },
-  comparisonHeroIconText: { color: 'white', fontSize: 27, fontWeight: '900' },
   comparisonHeroCopy: { flex: 1 },
   comparisonHeroEyebrow: {
     color: '#CDE9DC',
@@ -440,7 +427,6 @@ export const researcherStyles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.background,
   },
-  comparisonArrowText: { color: colors.primary, fontSize: 17 },
   improvementMessage: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -448,11 +434,6 @@ export const researcherStyles = StyleSheet.create({
     padding: 10,
     borderRadius: 12,
     backgroundColor: '#F4FAF7',
-  },
-  improvementMessageIcon: {
-    color: colors.success,
-    fontSize: 15,
-    fontWeight: '900',
   },
   improvementMessageText: { flex: 1, color: colors.muted, fontSize: 11 },
   noDataText: {
@@ -503,11 +484,6 @@ export const researcherStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.purple,
-  },
-  datasetIconText: {
-    color: colors.primaryDark,
-    fontSize: 14,
-    fontWeight: '900',
   },
   datasetCopy: { flex: 1, gap: 3 },
   datasetTitle: { color: colors.text, fontSize: 13, fontWeight: '800' },
@@ -588,11 +564,6 @@ export const researcherStyles = StyleSheet.create({
     padding: 14,
     borderRadius: 17,
     backgroundColor: colors.blue,
-  },
-  securityNoteIcon: {
-    color: colors.primaryDark,
-    fontSize: 20,
-    fontWeight: '900',
   },
   securityNoteTitle: { color: colors.text, fontSize: 12, fontWeight: '800' },
   securityNoteText: {
@@ -756,11 +727,6 @@ export const researcherStyles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.purple,
   },
-  detailInfoIconText: {
-    color: colors.primaryDark,
-    fontSize: 16,
-    fontWeight: '900',
-  },
   detailInfoCopy: { flex: 1, gap: 3 },
   detailInfoLabel: { color: colors.muted, fontSize: 10, fontWeight: '700' },
   detailInfoValue: {
@@ -787,11 +753,6 @@ export const researcherStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.blue,
-  },
-  healthIconText: {
-    color: colors.primaryDark,
-    fontSize: 15,
-    fontWeight: '900',
   },
   healthLabel: { color: colors.muted, fontSize: 9, fontWeight: '700' },
   healthValue: {
@@ -865,11 +826,6 @@ export const researcherStyles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.purple,
   },
-  compactEmptyIconText: {
-    color: colors.primaryDark,
-    fontSize: 17,
-    fontWeight: '900',
-  },
   compactEmptyCopy: { flex: 1, gap: 3 },
   compactEmptyTitle: { color: colors.text, fontSize: 13, fontWeight: '800' },
   compactEmptyText: { color: colors.muted, fontSize: 10, lineHeight: 15 },
@@ -935,7 +891,6 @@ export const researcherStyles = StyleSheet.create({
     borderRadius: 17,
     backgroundColor: '#FFF0D6',
   },
-  detailPrivacyIcon: { color: colors.warning, fontSize: 19, fontWeight: '900' },
   detailPrivacyText: {
     flex: 1,
     color: colors.muted,

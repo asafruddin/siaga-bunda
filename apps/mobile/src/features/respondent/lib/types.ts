@@ -11,6 +11,7 @@ export type Video = {
   completion_percentage: number;
   max_watched_seconds: number;
   available_at?: string;
+  is_last_video?: boolean;
 };
 
 export type VideoProgress = {
@@ -27,6 +28,7 @@ export type VideoDetail = {
   video_url: string;
   duration_seconds: number;
   progress: VideoProgress;
+  is_last_video?: boolean;
 };
 
 export const videoStatusLabels: Record<VideoStatus, string> = {

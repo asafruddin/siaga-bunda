@@ -6,6 +6,8 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { colors } from '@/theme';
 import { formatVideoTime } from '../lib/format-time';
 import { VideoSeekBar } from './video-seek-bar';
@@ -86,7 +88,12 @@ export function VideoPlayerControls({
                 pressed && styles.pressed,
               ]}
             >
-              <Text style={styles.iconText}>↶10</Text>
+              <MaterialCommunityIcons
+                accessible={false}
+                color="white"
+                name="rewind-10"
+                size={18}
+              />
             </Pressable>
 
             <Pressable
@@ -98,7 +105,12 @@ export function VideoPlayerControls({
                 pressed && styles.pressed,
               ]}
             >
-              <Text style={styles.playText}>{playing ? 'Ⅱ' : '▶'}</Text>
+              <Ionicons
+                accessible={false}
+                color="white"
+                name={playing ? 'pause' : 'play'}
+                size={17}
+              />
             </Pressable>
 
             <Pressable
@@ -110,7 +122,12 @@ export function VideoPlayerControls({
                 pressed && styles.pressed,
               ]}
             >
-              <Text style={styles.iconText}>10↷</Text>
+              <MaterialCommunityIcons
+                accessible={false}
+                color="white"
+                name="fast-forward-10"
+                size={18}
+              />
             </Pressable>
 
             <Pressable
@@ -122,7 +139,12 @@ export function VideoPlayerControls({
                 pressed && styles.pressed,
               ]}
             >
-              <Text style={styles.iconText}>{muted ? '🔇' : '🔊'}</Text>
+              <Ionicons
+                accessible={false}
+                color="white"
+                name={muted ? 'volume-mute' : 'volume-high'}
+                size={17}
+              />
             </Pressable>
 
             <Pressable
@@ -136,7 +158,12 @@ export function VideoPlayerControls({
                 pressed && styles.pressed,
               ]}
             >
-              <Text style={styles.iconText}>{fullscreen ? '✕' : '⛶'}</Text>
+              <MaterialCommunityIcons
+                accessible={false}
+                color="white"
+                name={fullscreen ? 'fullscreen-exit' : 'fullscreen'}
+                size={19}
+              />
             </Pressable>
           </View>
         </View>
@@ -202,16 +229,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.primary,
-  },
-  playText: {
-    color: 'white',
-    fontSize: 13,
-    fontWeight: '900',
-  },
-  iconText: {
-    color: 'white',
-    fontSize: 10,
-    fontWeight: '800',
   },
   pressed: { opacity: 0.65 },
 });

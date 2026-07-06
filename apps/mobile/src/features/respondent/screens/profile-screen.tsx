@@ -1,6 +1,8 @@
-import { Alert, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
+import { useState, type ComponentProps } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import {
   Button,
   Loading,
@@ -10,7 +12,6 @@ import {
   Title,
 } from '@/components/ui';
 import { api } from '@/services/api';
-import { useSession } from '@/services/session';
 import { colors } from '@/theme';
 import { ProfileRow } from '../components/profile-row';
 import { SectionTitle } from '../components/section-title';
@@ -18,6 +19,7 @@ import { formatDate } from '../lib/format';
 import { type Video } from '../lib/types';
 
 export function ProfileScreen() {
+  const [mountedAt] = useState(() => Date.now());
   const profile = useQuery({
     queryKey: ['profile'],
     queryFn: () => api<any>('/respondents/me'),
@@ -68,7 +70,7 @@ export function ProfileScreen() {
   const daysUntilHpl = Math.max(
     0,
     Math.ceil(
-      (new Date(`${p.hpl}T00:00:00`).getTime() - Date.now()) / 86_400_000,
+      (new Date(`${p.hpl}T00:00:00`).getTime() - mountedAt) / 86_400_000,
     ),
   );
   const trimester =
@@ -83,22 +85,7 @@ export function ProfileScreen() {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase())
     .join('');
-  const signOut = () =>
-    Alert.alert(
-      'Keluar dari akun?',
-      'Ibu perlu masuk kembali untuk melanjutkan progres edukasi.',
-      [
-        { text: 'Batal', style: 'cancel' },
-        {
-          text: 'Keluar',
-          style: 'destructive',
-          onPress: async () => {
-            await useSession.getState().signOut();
-            router.replace('/onboarding' as never);
-          },
-        },
-      ],
-    );
+
   return (
     <Screen>
       <View style={styles.header}>
@@ -111,7 +98,13 @@ export function ProfileScreen() {
             {p.age} tahun • {p.occupation}
           </Text>
           <View style={styles.verifiedPill}>
-            <Text style={styles.verifiedText}>✓ Data terdaftar</Text>
+            <Ionicons
+              accessible={false}
+              color={colors.success}
+              name="checkmark-circle"
+              size={14}
+            />
+            <Text style={styles.verifiedText}>Data terdaftar</Text>
           </View>
         </View>
       </View>
@@ -119,7 +112,12 @@ export function ProfileScreen() {
       <View style={styles.pregnancySummary}>
         <View style={styles.pregnancyTopRow}>
           <View style={styles.pregnancyIcon}>
-            <Text style={styles.pregnancyIconText}>♡</Text>
+            <MaterialCommunityIcons
+              accessible={false}
+              color="white"
+              name="human-pregnant"
+              size={34}
+            />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.summaryEyebrow}>KEHAMILAN SAAT INI</Text>
@@ -156,10 +154,27 @@ export function ProfileScreen() {
 
       <SectionTitle title="Data pribadi" hint="Informasi identitas Ibu" />
       <View style={styles.infoCard}>
-        <ProfileRow icon="☎" label="Nomor telepon" value={p.phone_number} />
-        <ProfileRow icon="⌂" label="Alamat" value={p.address} />
-        <ProfileRow icon="⌑" label="Pendidikan" value={p.education} />
-        <ProfileRow icon="▣" label="Pekerjaan" value={p.occupation} last />
+        <ProfileRow
+          icon={<ProfileIcon name="phone-outline" />}
+          label="Nomor telepon"
+          value={p.phone_number}
+        />
+        <ProfileRow
+          icon={<ProfileIcon name="map-marker-outline" />}
+          label="Alamat"
+          value={p.address}
+        />
+        <ProfileRow
+          icon={<ProfileIcon name="school-outline" />}
+          label="Pendidikan"
+          value={p.education}
+        />
+        <ProfileRow
+          icon={<ProfileIcon name="briefcase-outline" />}
+          label="Pekerjaan"
+          value={p.occupation}
+          last
+        />
       </View>
 
       <SectionTitle
@@ -167,29 +182,33 @@ export function ProfileScreen() {
         hint="Data kesehatan dan pendampingan"
       />
       <View style={styles.infoCard}>
-        <ProfileRow icon="◷" label="HPHT" value={formatDate(p.hpht)} />
         <ProfileRow
-          icon="♙"
+          icon={<ProfileIcon name="calendar-month-outline" />}
+          label="HPHT"
+          value={formatDate(p.hpht)}
+        />
+        <ProfileRow
+          icon={<ProfileIcon name="baby-face-outline" />}
           label="Jumlah anak"
           value={`${p.number_of_children} anak`}
         />
         <ProfileRow
-          icon="✚"
+          icon={<ProfileIcon name="medical-bag" />}
           label="Riwayat kesehatan"
           value={p.medical_history || 'Tidak ada'}
         />
         <ProfileRow
-          icon="♡"
+          icon={<ProfileIcon name="heart-pulse" />}
           label="Riwayat persalinan"
           value={p.birth_history || 'Tidak ada'}
         />
         <ProfileRow
-          icon="♧"
+          icon={<ProfileIcon name="account-heart-outline" />}
           label="Dukungan keluarga"
           value={p.husband_support ? 'Ada' : 'Tidak ada'}
         />
         <ProfileRow
-          icon="!"
+          icon={<ProfileIcon name="alert-circle-outline" />}
           label="Riwayat komplikasi"
           value={p.pregnancy_complication_history || 'Tidak ada'}
           last
@@ -197,17 +216,33 @@ export function ProfileScreen() {
       </View>
 
       <View style={styles.privacyNote}>
-        <Text style={styles.privacyIcon}>⌾</Text>
+        <MaterialCommunityIcons
+          accessible={false}
+          color={colors.primaryDark}
+          name="shield-lock-outline"
+          size={21}
+        />
         <Text style={styles.privacyText}>
           Data Ibu terlindungi dan hanya digunakan untuk keperluan edukasi serta
           penelitian yang telah disetujui.
         </Text>
       </View>
-
-      <Button variant="danger" onPress={signOut}>
-        Keluar
-      </Button>
     </Screen>
+  );
+}
+
+function ProfileIcon({
+  name,
+}: {
+  name: ComponentProps<typeof MaterialCommunityIcons>['name'];
+}) {
+  return (
+    <MaterialCommunityIcons
+      accessible={false}
+      color={colors.primaryDark}
+      name={name}
+      size={19}
+    />
   );
 }
 
@@ -238,6 +273,9 @@ const styles = StyleSheet.create({
   name: { fontSize: 24, fontWeight: '900', color: colors.text },
   meta: { fontSize: 14, color: colors.muted },
   verifiedPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     marginTop: 3,
     borderRadius: 99,
     paddingHorizontal: 9,
@@ -264,7 +302,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  pregnancyIconText: { color: 'white', fontSize: 34, fontWeight: '300' },
   summaryEyebrow: {
     color: '#F4CFE0',
     fontSize: 10,
@@ -334,6 +371,5 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: colors.blue,
   },
-  privacyIcon: { color: colors.primaryDark, fontSize: 20, fontWeight: '900' },
   privacyText: { flex: 1, color: colors.muted, fontSize: 12, lineHeight: 18 },
 });

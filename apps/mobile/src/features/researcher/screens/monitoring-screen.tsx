@@ -1,9 +1,11 @@
 import { Pressable, Text, View } from 'react-native';
-import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { router } from 'expo-router';
 import { Button, Loading, Notice, Screen } from '@/components/ui';
-import { colors } from '@/theme';
 import { api } from '@/services/api';
+import { colors } from '@/theme';
 import { researcherStyles as s } from '../lib/styles';
 
 const stages = [
@@ -34,7 +36,12 @@ export function MonitoringScreen() {
       <View style={s.pageHeading}>
         <View style={s.pageEyebrowRow}>
           <View style={[s.pageIconBox, { backgroundColor: colors.blue }]}>
-            <Text style={s.pageIconText}>▶</Text>
+            <MaterialCommunityIcons
+              accessible={false}
+              color={colors.primaryDark}
+              name="video-outline"
+              size={18}
+            />
           </View>
           <Text style={s.pageEyebrow}>PROGRES MATERI</Text>
         </View>
@@ -109,7 +116,12 @@ export function MonitoringScreen() {
                       {cohort} responden tercatat
                     </Text>
                   </View>
-                  <Text style={s.rowChevron}>›</Text>
+                  <Ionicons
+                    accessible={false}
+                    color={colors.primary}
+                    name="chevron-forward"
+                    size={21}
+                  />
                 </View>
                 <View style={s.stageGrid}>
                   {stages.map((stage) => {
@@ -148,7 +160,12 @@ export function MonitoringScreen() {
       ) : (
         <View style={s.emptyState}>
           <View style={[s.emptyStateIcon, { backgroundColor: colors.blue }]}>
-            <Text style={s.emptyStateIconText}>▶</Text>
+            <MaterialCommunityIcons
+              accessible={false}
+              color={colors.primaryDark}
+              name="video-off-outline"
+              size={28}
+            />
           </View>
           <Text style={s.emptyStateTitle}>Belum ada aktivitas video</Text>
           <Text style={s.emptyStateText}>

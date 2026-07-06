@@ -80,3 +80,24 @@ export async function audit(
     metadata,
   });
 }
+
+export function posttestDelayMs() {
+  const minutes = process.env.POSTTEST_DELAY_MINUTES;
+  if (minutes !== undefined && minutes !== '') {
+    return Number(minutes) * 60_000;
+  }
+  return Number(process.env.POSTTEST_DELAY_DAYS ?? 7) * 86_400_000;
+}
+
+export async function maxActiveVideoSequence(client: ReturnType<typeof db>) {
+  const video = row(
+    await client
+      .from('videos')
+      .select('sequence_number')
+      .eq('is_active', true)
+      .order('sequence_number', { ascending: false })
+      .limit(1)
+      .single(),
+  ) as { sequence_number: number };
+  return video.sequence_number;
+}

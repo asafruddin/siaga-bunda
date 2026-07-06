@@ -1,8 +1,9 @@
 import { Text, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Button, Loading, Notice, Screen } from '@/components/ui';
-import { colors } from '@/theme';
 import { api } from '@/services/api';
+import { colors } from '@/theme';
 import { researcherStyles as s } from '../lib/styles';
 
 export function ResultsScreen({ type }: { type: 'pretest' | 'posttest' }) {
@@ -36,7 +37,12 @@ export function ResultsScreen({ type }: { type: 'pretest' | 'posttest' }) {
               { backgroundColor: isPretest ? colors.purple : '#E2F2E9' },
             ]}
           >
-            <Text style={s.pageIconText}>{isPretest ? 'A' : '✓'}</Text>
+            <MaterialIcons
+              accessible={false}
+              color={isPretest ? colors.primaryDark : colors.success}
+              name={isPretest ? 'quiz' : 'fact-check'}
+              size={18}
+            />
           </View>
           <Text style={s.pageEyebrow}>HASIL EVALUASI</Text>
         </View>
@@ -165,7 +171,12 @@ export function ResultsScreen({ type }: { type: 'pretest' | 'posttest' }) {
               { backgroundColor: isPretest ? colors.purple : '#E2F2E9' },
             ]}
           >
-            <Text style={s.emptyStateIconText}>{isPretest ? 'A' : '✓'}</Text>
+            <MaterialIcons
+              accessible={false}
+              color={isPretest ? colors.primaryDark : colors.success}
+              name={isPretest ? 'quiz' : 'fact-check'}
+              size={29}
+            />
           </View>
           <Text style={s.emptyStateTitle}>Belum ada hasil {type}</Text>
           <Text style={s.emptyStateText}>

@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Alert, Pressable, Text, View } from 'react-native';
+import Feather from '@expo/vector-icons/Feather';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { Button, Field, Screen } from '@/components/ui';
@@ -10,35 +12,35 @@ import { researcherStyles as s } from '../lib/styles';
 const datasetTypes = [
   {
     value: 'full_dataset',
-    icon: '▦',
+    icon: 'table-large',
     title: 'Dataset lengkap',
     description: 'Profil anonim, progres video, pretest, dan posttest',
   },
   {
     value: 'respondent_data',
-    icon: '●●',
+    icon: 'account-group-outline',
     title: 'Data responden',
     description: 'Kode responden dan tanggal pendaftaran',
   },
   {
     value: 'video_progress',
-    icon: '▶',
+    icon: 'video-outline',
     title: 'Progres video',
     description: 'Status, persentase, dan waktu penyelesaian video',
   },
   {
     value: 'pretest',
-    icon: 'A',
+    icon: 'clipboard-text-outline',
     title: 'Hasil pretest',
     description: 'Nilai awal responden untuk setiap materi',
   },
   {
     value: 'posttest',
-    icon: '✓',
+    icon: 'clipboard-check-outline',
     title: 'Hasil posttest',
     description: 'Nilai akhir dan jadwal penyelesaian posttest',
   },
-];
+] as const;
 
 const statuses = [
   { value: '', label: 'Semua' },
@@ -112,7 +114,12 @@ export function ExportScreen() {
       <View style={s.pageHeading}>
         <View style={s.pageEyebrowRow}>
           <View style={[s.pageIconBox, { backgroundColor: '#ECEFF7' }]}>
-            <Text style={s.pageIconText}>↓</Text>
+            <Feather
+              accessible={false}
+              color={colors.primaryDark}
+              name="download"
+              size={17}
+            />
           </View>
           <Text style={s.pageEyebrow}>DATA PENELITIAN</Text>
         </View>
@@ -155,11 +162,12 @@ export function ExportScreen() {
                   selected && { backgroundColor: colors.primary },
                 ]}
               >
-                <Text
-                  style={[s.datasetIconText, selected && { color: 'white' }]}
-                >
-                  {dataset.icon}
-                </Text>
+                <MaterialCommunityIcons
+                  accessible={false}
+                  color={selected ? 'white' : colors.primaryDark}
+                  name={dataset.icon}
+                  size={21}
+                />
               </View>
               <View style={s.datasetCopy}>
                 <Text style={s.datasetTitle}>{dataset.title}</Text>
@@ -271,7 +279,12 @@ export function ExportScreen() {
       </View>
 
       <View style={s.securityNote}>
-        <Text style={s.securityNoteIcon}>⌾</Text>
+        <MaterialCommunityIcons
+          accessible={false}
+          color={colors.primaryDark}
+          name="shield-lock-outline"
+          size={20}
+        />
         <View style={{ flex: 1 }}>
           <Text style={s.securityNoteTitle}>Privasi data terjaga</Text>
           <Text style={s.securityNoteText}>

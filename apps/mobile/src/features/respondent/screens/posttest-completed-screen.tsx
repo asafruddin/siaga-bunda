@@ -1,5 +1,8 @@
 import { Text, View } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router } from 'expo-router';
+import { colors } from '@/theme';
 import {
   CompletionState,
   completionStyles as s,
@@ -9,24 +12,36 @@ export function PosttestCompletedScreen() {
   return (
     <CompletionState
       eyebrow="MATERI SELESAI"
-      icon="✓"
+      icon={
+        <Ionicons
+          accessible={false}
+          color="white"
+          name="checkmark-circle"
+          size={48}
+        />
+      }
       title="Posttest berhasil dikirim"
-      description="Terima kasih sudah menyelesaikan seluruh rangkaian materi ini, Bu. Progres Ibu telah tersimpan."
+      description="Terima kasih, Bu. Seluruh rangkaian edukasi SiAGA Bunda telah selesai dan progres Ibu telah tersimpan."
       detail={
         <View style={s.unlockRow}>
           <View style={s.unlockIcon}>
-            <Text style={s.unlockIconText}>⌑</Text>
+            <MaterialCommunityIcons
+              accessible={false}
+              color={colors.success}
+              name="check-decagram"
+              size={21}
+            />
           </View>
           <View style={s.unlockCopy}>
-            <Text style={s.unlockTitle}>Materi berikutnya terbuka</Text>
+            <Text style={s.unlockTitle}>Program edukasi selesai</Text>
             <Text style={s.unlockText}>
-              Ibu dapat melanjutkan belajar dari halaman beranda.
+              Ibu telah menyelesaikan ketujuh materi dan evaluasi akhir.
             </Text>
           </View>
         </View>
       }
-      note="Lanjutkan sesuai waktu dan kenyamanan Ibu. Setiap langkah kecil membantu menjaga ibu dan bayi."
-      actionLabel="Lihat Materi Berikutnya"
+      note="Terus jaga kesehatan kehamilan dan segera cari pertolongan bila muncul tanda bahaya."
+      actionLabel="Kembali ke Beranda"
       onAction={() => router.replace('/respondent/dashboard' as never)}
       success
     />

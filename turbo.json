@@ -6,6 +6,7 @@
     "SUPABASE_ANON_KEY",
     "JWT_SECRET",
     "POSTTEST_DELAY_DAYS",
+    "POSTTEST_DELAY_MINUTES",
     "ALLOWED_ORIGINS"
   ],
   "tasks": {

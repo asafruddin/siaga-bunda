@@ -1,6 +1,9 @@
+import type { ComponentProps, ReactNode } from 'react';
 import { Text, View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
+import Feather from '@expo/vector-icons/Feather';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { useLocalSearchParams } from 'expo-router';
 import {
   Badge,
   Button,
@@ -9,24 +12,42 @@ import {
   Progress,
   Screen,
 } from '@/components/ui';
-import { colors } from '@/theme';
 import { api } from '@/services/api';
+import { colors } from '@/theme';
 import { formatDate, formatDateTime } from '../lib/format';
+import {
+  simplifyActivity,
+  type TimelineActivity,
+} from '../lib/simplify-activity';
 import { statusLabel } from '../lib/status-label';
 import { researcherStyles as s } from '../lib/styles';
 
 const actionLabels: Record<string, string> = {
   respondent_registered: 'Responden terdaftar',
-  pretest_started: 'Pretest dimulai',
-  pretest_submitted: 'Pretest dikirim',
-  video_started: 'Video mulai ditonton',
-  video_progress_updated: 'Progres video diperbarui',
-  video_completed: 'Video selesai ditonton',
-  posttest_scheduled: 'Posttest dijadwalkan',
-  posttest_available: 'Posttest tersedia',
-  posttest_submitted: 'Posttest dikirim',
-  next_video_unlocked: 'Video berikutnya terbuka',
 };
+
+function activityTitle(activity: TimelineActivity, videoNumber?: number) {
+  const video = videoNumber ? `Video ${videoNumber}` : 'video';
+  const labels: Record<string, string> = {
+    pretest_started: `Pretest ${video} dimulai`,
+    pretest_submitted: `Pretest ${video} dikirim`,
+    video_started: `Mulai menonton ${video}`,
+    video_progress_updated: `Progres terakhir ${video}`,
+    video_completed: `${video} selesai ditonton`,
+    posttest_scheduled: `Posttest ${video} dijadwalkan`,
+    posttest_available: `Posttest ${video} tersedia`,
+    posttest_submitted: `Posttest ${video} dikirim`,
+    next_video_unlocked: videoNumber
+      ? `${video} terbuka`
+      : 'Video berikutnya terbuka',
+  };
+
+  return (
+    labels[activity.action] ??
+    actionLabels[activity.action] ??
+    activity.action.replaceAll('_', ' ')
+  );
+}
 
 export function RespondentDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -57,7 +78,14 @@ export function RespondentDetail() {
   const { profile } = q.data;
   const progress: any[] = q.data.progress ?? [];
   const tests: any[] = q.data.tests ?? [];
-  const timeline: any[] = q.data.timeline ?? [];
+  const timeline = (q.data.timeline ?? []) as TimelineActivity[];
+  const visibleActivity = simplifyActivity(timeline);
+  const videoNumbers = new Map<string, number>(
+    progress.map((item: any) => [
+      String(item.video_id),
+      Number(item.videos.sequence_number),
+    ]),
+  );
   const completedVideos = progress.filter(
     (item: any) => item.status === 'completed',
   ).length;
@@ -144,7 +172,10 @@ export function RespondentDetail() {
         <View style={s.detailMetricDivider} />
         <DetailMetric value={tests.length} label="Tes dikirim" />
         <View style={s.detailMetricDivider} />
-        <DetailMetric value={timeline.length} label="Aktivitas" />
+        <DetailMetric
+          value={visibleActivity.length}
+          label="Aktivitas penting"
+        />
       </View>
 
       <SectionHeading
@@ -153,18 +184,22 @@ export function RespondentDetail() {
       />
       <View style={s.detailInfoCard}>
         <DetailRow
-          icon="☎"
+          icon={<DetailIcon name="phone-outline" />}
           label="Nomor telepon"
           value={profile.phone_number}
         />
-        <DetailRow icon="⌂" label="Alamat" value={profile.address} />
         <DetailRow
-          icon="⌑"
+          icon={<DetailIcon name="map-marker-outline" />}
+          label="Alamat"
+          value={profile.address}
+        />
+        <DetailRow
+          icon={<DetailIcon name="school-outline" />}
           label="Pendidikan"
           value={profile.education || 'Tidak diisi'}
         />
         <DetailRow
-          icon="♧"
+          icon={<DetailIcon name="account-heart-outline" />}
           label="Dukungan keluarga"
           value={profile.husband_support ? 'Ada' : 'Tidak ada'}
           last
@@ -177,22 +212,22 @@ export function RespondentDetail() {
       />
       <View style={s.healthGrid}>
         <HealthCard
-          icon="✚"
+          icon={<DetailIcon name="medical-bag" />}
           label="Riwayat medis"
           value={profile.medical_history || 'Tidak ada'}
         />
         <HealthCard
-          icon="!"
+          icon={<DetailIcon name="alert-circle-outline" />}
           label="Riwayat komplikasi"
           value={profile.pregnancy_complication_history || 'Tidak ada'}
         />
         <HealthCard
-          icon="♡"
+          icon={<DetailIcon name="heart-pulse" />}
           label="Riwayat persalinan"
           value={profile.birth_history || 'Tidak ada'}
         />
         <HealthCard
-          icon="♙"
+          icon={<DetailIcon name="baby-face-outline" />}
           label="Jumlah anak"
           value={`${profile.number_of_children ?? 0} anak`}
         />
@@ -247,7 +282,7 @@ export function RespondentDetail() {
         </View>
       ) : (
         <CompactEmpty
-          icon="▶"
+          icon={<DetailIcon name="video-off-outline" size={24} />}
           title="Belum ada progres video"
           text="Aktivitas akan muncul setelah responden memulai pretest."
         />
@@ -300,7 +335,12 @@ export function RespondentDetail() {
               <View style={s.testScoresRow}>
                 <TestScore label="Pretest" test={pretest} tone="pre" />
                 <View style={s.comparisonArrow}>
-                  <Text style={s.comparisonArrowText}>→</Text>
+                  <Feather
+                    accessible={false}
+                    color={colors.primary}
+                    name="arrow-right"
+                    size={18}
+                  />
                 </View>
                 <TestScore label="Posttest" test={posttest} tone="post" />
               </View>
@@ -309,7 +349,7 @@ export function RespondentDetail() {
         })
       ) : (
         <CompactEmpty
-          icon="A"
+          icon={<DetailIcon name="clipboard-text-outline" size={24} />}
           title="Belum ada nilai tes"
           text="Nilai muncul setelah responden mengirim pretest atau posttest."
         />
@@ -317,11 +357,11 @@ export function RespondentDetail() {
 
       <SectionHeading
         title="Jejak aktivitas"
-        hint="Riwayat tindakan tercatat otomatis"
+        hint="Checkpoint berulang diringkas otomatis"
       />
-      {timeline.length ? (
+      {visibleActivity.length ? (
         <View style={s.auditCard}>
-          {timeline.map((item: any, index: number) => (
+          {visibleActivity.map((item, index) => (
             <View key={`${item.created_at}-${index}`} style={s.auditRow}>
               <View style={s.auditRail}>
                 <View
@@ -332,14 +372,18 @@ export function RespondentDetail() {
                     },
                   ]}
                 />
-                {index < timeline.length - 1 ? (
+                {index < visibleActivity.length - 1 ? (
                   <View style={s.auditLine} />
                 ) : null}
               </View>
               <View style={s.auditContent}>
                 <Text style={s.auditTitle}>
-                  {actionLabels[item.action] ??
-                    String(item.action).replaceAll('_', ' ')}
+                  {activityTitle(
+                    item,
+                    item.entity_id
+                      ? videoNumbers.get(item.entity_id)
+                      : undefined,
+                  )}
                 </Text>
                 <Text style={s.auditTime}>
                   {formatDateTime(item.created_at)}
@@ -350,14 +394,19 @@ export function RespondentDetail() {
         </View>
       ) : (
         <CompactEmpty
-          icon="◷"
+          icon={<DetailIcon name="timeline-clock-outline" size={24} />}
           title="Belum ada jejak aktivitas"
           text="Tindakan penting responden akan tercatat di bagian ini."
         />
       )}
 
       <View style={s.detailPrivacyNote}>
-        <Text style={s.detailPrivacyIcon}>⌾</Text>
+        <MaterialCommunityIcons
+          accessible={false}
+          color={colors.warning}
+          name="shield-alert-outline"
+          size={21}
+        />
         <Text style={s.detailPrivacyText}>
           Data ini bersifat rahasia. Jangan membagikan identitas atau riwayat
           kesehatan responden di luar kebutuhan penelitian.
@@ -391,16 +440,14 @@ function DetailRow({
   value,
   last = false,
 }: {
-  icon: string;
+  icon: ReactNode;
   label: string;
   value: string;
   last?: boolean;
 }) {
   return (
     <View style={[s.detailInfoRow, !last && s.listRowBorder]}>
-      <View style={s.detailInfoIcon}>
-        <Text style={s.detailInfoIconText}>{icon}</Text>
-      </View>
+      <View style={s.detailInfoIcon}>{icon}</View>
       <View style={s.detailInfoCopy}>
         <Text style={s.detailInfoLabel}>{label}</Text>
         <Text style={s.detailInfoValue}>{value}</Text>
@@ -414,15 +461,13 @@ function HealthCard({
   label,
   value,
 }: {
-  icon: string;
+  icon: ReactNode;
   label: string;
   value: string;
 }) {
   return (
     <View style={s.healthCard}>
-      <View style={s.healthIcon}>
-        <Text style={s.healthIconText}>{icon}</Text>
-      </View>
+      <View style={s.healthIcon}>{icon}</View>
       <Text style={s.healthLabel}>{label}</Text>
       <Text style={s.healthValue}>{value}</Text>
     </View>
@@ -468,19 +513,34 @@ function CompactEmpty({
   title,
   text,
 }: {
-  icon: string;
+  icon: ReactNode;
   title: string;
   text: string;
 }) {
   return (
     <View style={s.compactEmpty}>
-      <View style={s.compactEmptyIcon}>
-        <Text style={s.compactEmptyIconText}>{icon}</Text>
-      </View>
+      <View style={s.compactEmptyIcon}>{icon}</View>
       <View style={s.compactEmptyCopy}>
         <Text style={s.compactEmptyTitle}>{title}</Text>
         <Text style={s.compactEmptyText}>{text}</Text>
       </View>
     </View>
+  );
+}
+
+function DetailIcon({
+  name,
+  size = 19,
+}: {
+  name: ComponentProps<typeof MaterialCommunityIcons>['name'];
+  size?: number;
+}) {
+  return (
+    <MaterialCommunityIcons
+      accessible={false}
+      color={colors.primaryDark}
+      name={name}
+      size={size}
+    />
   );
 }

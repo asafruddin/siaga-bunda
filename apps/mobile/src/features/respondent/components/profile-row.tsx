@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { colors } from '@/theme';
 
@@ -7,16 +8,14 @@ export function ProfileRow({
   value,
   last = false,
 }: {
-  icon: string;
+  icon: ReactNode;
   label: string;
   value: string;
   last?: boolean;
 }) {
   return (
     <View style={[styles.row, !last && styles.rowBorder]}>
-      <View style={styles.icon}>
-        <Text style={styles.iconText}>{icon}</Text>
-      </View>
+      <View style={styles.icon}>{icon}</View>
       <View style={styles.content}>
         <Text style={styles.label}>{label}</Text>
         <Text style={styles.value}>{value}</Text>
@@ -44,7 +43,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.purple,
   },
-  iconText: { color: colors.primaryDark, fontSize: 18, fontWeight: '800' },
   content: { flex: 1, gap: 3 },
   label: { color: colors.muted, fontSize: 12, fontWeight: '600' },
   value: {

@@ -3,7 +3,6 @@ import { colors } from '@/theme';
 
 export const respondentStyles = StyleSheet.create({
   cardTitle: { fontSize: 17, fontWeight: '800', color: colors.text },
-  icon: { fontSize: 58, color: colors.primary, textAlign: 'center' },
 
   testIntroHeading: { gap: 8 },
   testTypePill: {
@@ -36,7 +35,6 @@ export const respondentStyles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.14)',
   },
-  testIntroHeroIconText: { color: 'white', fontSize: 21, fontWeight: '900' },
   testIntroHeroValue: { color: 'white', fontSize: 35, fontWeight: '900' },
   testIntroHeroLabel: { color: '#EAD9E1', fontSize: 11 },
   instructionCard: {
@@ -87,7 +85,6 @@ export const respondentStyles = StyleSheet.create({
     borderRadius: 15,
     backgroundColor: colors.blue,
   },
-  testNoticeIcon: { color: colors.primary, fontSize: 15, fontWeight: '900' },
   testNoticeText: {
     flex: 1,
     color: colors.muted,

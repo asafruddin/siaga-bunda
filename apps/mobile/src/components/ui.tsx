@@ -1,7 +1,20 @@
-import type { PropsWithChildren, ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type PropsWithChildren,
+  type ReactNode,
+} from 'react';
 import {
   ActivityIndicator,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,6 +23,7 @@ import {
   type TextInputProps,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { colors } from '../theme';
 import {
@@ -17,23 +31,105 @@ import {
   normalizeNumericInput,
 } from '../lib/normalize-numeric-input';
 
+type FormScrollContextValue = {
+  scrollToFocusedInput: (target: View) => void;
+};
+
+const FormScrollContext = createContext<FormScrollContextValue | null>(null);
+
+function useKeyboardInset() {
+  const [inset, setInset] = useState(0);
+
+  useEffect(() => {
+    const showEvent =
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent =
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSub = Keyboard.addListener(showEvent, (event) => {
+      setInset(event.endCoordinates.height);
+    });
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setInset(0);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  return inset;
+}
+
 export function Screen({
   children,
   scroll = true,
   showBack,
-}: PropsWithChildren<{ scroll?: boolean; showBack?: boolean }>) {
+  refreshing,
+  onRefresh,
+}: PropsWithChildren<{
+  scroll?: boolean;
+  showBack?: boolean;
+  refreshing?: boolean;
+  onRefresh?: () => void;
+}>) {
   const router = useRouter();
   const canBack = showBack ?? router.canGoBack();
+  const keyboardInset = useKeyboardInset();
+  const scrollRef = useRef<ScrollView>(null);
+  const contentRef = useRef<View>(null);
+
+  const scrollToFocusedInput = useCallback((target: View) => {
+    const scrollView = scrollRef.current;
+    const content = contentRef.current;
+    if (!scrollView || !content) return;
+
+    target.measureLayout(
+      content,
+      (_left, top, _width, height) => {
+        scrollView.scrollTo({
+          y: Math.max(0, top + height - 220),
+          animated: true,
+        });
+      },
+      () => {},
+    );
+  }, []);
+
+  const contentStyle = [
+    s.content,
+    keyboardInset > 0 && { paddingBottom: 36 + keyboardInset },
+  ];
+
   const body = scroll ? (
-    <ScrollView
-      contentContainerStyle={s.content}
-      keyboardShouldPersistTaps="handled"
-    >
-      {children}
-    </ScrollView>
+    <FormScrollContext.Provider value={{ scrollToFocusedInput }}>
+      <ScrollView
+        ref={scrollRef}
+        automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+        contentContainerStyle={contentStyle}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
+        refreshControl={
+          onRefresh ? (
+            <RefreshControl
+              colors={[colors.primary]}
+              onRefresh={onRefresh}
+              refreshing={refreshing ?? false}
+              tintColor={colors.primary}
+            />
+          ) : undefined
+        }
+      >
+        <View ref={contentRef} style={s.contentInner}>
+          {children}
+        </View>
+      </ScrollView>
+    </FormScrollContext.Provider>
   ) : (
-    <View style={s.content}>{children}</View>
+    <View style={contentStyle}>{children}</View>
   );
+
   return (
     <SafeAreaView style={s.safe}>
       {canBack ? (
@@ -43,12 +139,22 @@ export function Screen({
           style={({ pressed }) => [s.back, pressed && { opacity: 0.55 }]}
         >
           <View style={s.backIcon}>
-            <Text style={s.backIconText}>‹</Text>
+            <Ionicons
+              accessible={false}
+              color={colors.primaryDark}
+              name="chevron-back"
+              size={19}
+            />
           </View>
           <Text style={s.backText}>Kembali</Text>
         </Pressable>
       ) : null}
-      {body}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={s.keyboard}
+      >
+        {body}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -103,8 +209,12 @@ export function Field({
   error,
   onChangeText,
   keyboardType,
+  onFocus,
   ...props
 }: TextInputProps & { label: string; error?: string }) {
+  const formScroll = useContext(FormScrollContext);
+  const fieldRef = useRef<View>(null);
+
   const handleChangeText = (text: string) => {
     if (!onChangeText) return;
     onChangeText(
@@ -112,8 +222,15 @@ export function Field({
     );
   };
 
+  const handleFocus: TextInputProps['onFocus'] = (event) => {
+    onFocus?.(event);
+    const target = fieldRef.current;
+    if (!target || !formScroll) return;
+    setTimeout(() => formScroll.scrollToFocusedInput(target), 100);
+  };
+
   return (
-    <View style={{ gap: 5 }}>
+    <View ref={fieldRef} style={{ gap: 5 }}>
       <Text style={s.label}>{label}</Text>
       <TextInput
         placeholderTextColor={colors.muted}
@@ -121,6 +238,7 @@ export function Field({
         {...props}
         keyboardType={keyboardType}
         onChangeText={handleChangeText}
+        onFocus={handleFocus}
       />
       {error && <Text style={s.error}>{error}</Text>}
     </View>
@@ -180,6 +298,8 @@ export function Notice({
 }
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
+  keyboard: { flex: 1 },
+  contentInner: { gap: 16 },
   back: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -198,14 +318,8 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.pink,
   },
-  backIconText: {
-    marginTop: -2,
-    color: colors.primaryDark,
-    fontSize: 25,
-    lineHeight: 26,
-  },
   backText: { fontSize: 14, fontWeight: '800', color: colors.primaryDark },
-  content: { padding: 20, paddingBottom: 36, gap: 16, flexGrow: 1 },
+  content: { padding: 20, paddingBottom: 36, flexGrow: 1 },
   title: { fontSize: 28, fontWeight: '800', color: colors.text },
   muted: { fontSize: 15, lineHeight: 22, color: colors.muted },
   label: { fontSize: 14, fontWeight: '700', color: colors.text },

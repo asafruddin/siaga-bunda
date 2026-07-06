@@ -1,6 +1,9 @@
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
+import Feather from '@expo/vector-icons/Feather';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { router } from 'expo-router';
 import { Button, Loading, Notice, Screen } from '@/components/ui';
 import { api } from '@/services/api';
 import { useSession } from '@/services/session';
@@ -31,42 +34,84 @@ export function ResearcherHome() {
     : null;
   const menus = [
     {
-      icon: '●●',
+      icon: (
+        <MaterialCommunityIcons
+          accessible={false}
+          color={colors.primaryDark}
+          name="account-group-outline"
+          size={21}
+        />
+      ),
       label: 'Data Responden',
       description: 'Cari, filter, dan lihat progres individu',
       path: '/researcher/respondents',
       tone: colors.pink,
     },
     {
-      icon: '▶',
+      icon: (
+        <MaterialCommunityIcons
+          accessible={false}
+          color={colors.primaryDark}
+          name="video-outline"
+          size={21}
+        />
+      ),
       label: 'Monitoring Video',
       description: 'Pantau penyelesaian setiap materi edukasi',
       path: '/researcher/video-monitoring',
       tone: colors.blue,
     },
     {
-      icon: 'A',
+      icon: (
+        <MaterialCommunityIcons
+          accessible={false}
+          color={colors.primaryDark}
+          name="clipboard-text-outline"
+          size={21}
+        />
+      ),
       label: 'Hasil Pretest',
       description: 'Lihat nilai awal responden per video',
       path: '/researcher/pretest-results',
       tone: colors.purple,
     },
     {
-      icon: '✓',
+      icon: (
+        <MaterialCommunityIcons
+          accessible={false}
+          color={colors.primaryDark}
+          name="clipboard-check-outline"
+          size={21}
+        />
+      ),
       label: 'Hasil Posttest',
       description: 'Tinjau hasil evaluasi setelah edukasi',
       path: '/researcher/posttest-results',
       tone: '#E2F2E9',
     },
     {
-      icon: '↗',
+      icon: (
+        <Feather
+          accessible={false}
+          color={colors.primaryDark}
+          name="trending-up"
+          size={20}
+        />
+      ),
       label: 'Perbandingan Hasil',
       description: 'Analisis perubahan nilai pretest dan posttest',
       path: '/researcher/comparison',
       tone: '#FFF0D6',
     },
     {
-      icon: '↓',
+      icon: (
+        <Feather
+          accessible={false}
+          color={colors.primaryDark}
+          name="download"
+          size={20}
+        />
+      ),
       label: 'Ekspor Data',
       description: 'Unduh dataset penelitian dalam format CSV',
       path: '/researcher/export',
@@ -207,13 +252,18 @@ export function ResearcherHome() {
             ]}
           >
             <View style={[styles.menuIcon, { backgroundColor: menu.tone }]}>
-              <Text style={styles.menuIconText}>{menu.icon}</Text>
+              {menu.icon}
             </View>
             <View style={styles.menuContent}>
               <Text style={styles.menuTitleRow}>{menu.label}</Text>
               <Text style={styles.menuDescription}>{menu.description}</Text>
             </View>
-            <Text style={styles.menuChevron}>›</Text>
+            <Ionicons
+              accessible={false}
+              color={colors.primary}
+              name="chevron-forward"
+              size={22}
+            />
           </Pressable>
         ))}
       </View>
@@ -354,21 +404,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  menuIconText: {
-    color: colors.primaryDark,
-    fontSize: 16,
-    fontWeight: '900',
-  },
   menuContent: { flex: 1, gap: 3 },
   menuTitleRow: { color: colors.text, fontSize: 15, fontWeight: '800' },
   menuDescription: {
     color: colors.muted,
     fontSize: 11,
     lineHeight: 16,
-  },
-  menuChevron: {
-    color: colors.primary,
-    fontSize: 28,
-    fontWeight: '300',
   },
 });

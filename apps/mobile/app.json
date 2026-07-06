@@ -3,17 +3,22 @@
     "name": "SiAGA Bunda",
     "slug": "siaga-bunda",
     "version": "1.0.0",
+    "icon": "./assets/app/launcher_icon_square.png",
     "orientation": "default",
     "scheme": "siagabunda",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "id.siagabunda.mobile"
+      "bundleIdentifier": "id.siagabunda.mobile",
+      "icon": "./assets/app/launcher_icon_square.png"
     },
     "android": {
       "package": "id.siagabunda.mobile",
+      "softwareKeyboardLayoutMode": "resize",
+      "icon": "./assets/app/launcher_icon_square.png",
       "adaptiveIcon": {
-        "backgroundColor": "#FCEEF4"
+        "foregroundImage": "./assets/app/launcher_icon_foreground.png",
+        "backgroundColor": "#FFF9FB"
       }
     },
     "plugins": [
@@ -21,7 +26,16 @@
       "expo-secure-store",
       "expo-screen-orientation",
       "@react-native-community/datetimepicker",
-      "expo-video"
+      "expo-video",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FFF9FB",
+          "image": "./assets/app/splash_logo.png",
+          "imageWidth": 280,
+          "resizeMode": "contain"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

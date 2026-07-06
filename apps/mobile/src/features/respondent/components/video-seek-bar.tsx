@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   LayoutChangeEvent,
   PanResponder,
@@ -20,30 +20,35 @@ export function VideoSeekBar({
   maxWatched,
   onSeek,
 }: VideoSeekBarProps) {
-  const trackWidth = useRef(0);
+  const [trackWidth, setTrackWidth] = useState(0);
 
-  const positionFromX = (x: number) => {
-    if (trackWidth.current <= 0 || duration <= 0) return 0;
-    const ratio = Math.max(0, Math.min(1, x / trackWidth.current));
-    const time = ratio * duration;
-    return Math.max(0, Math.min(maxWatched, time));
-  };
+  const positionFromX = useCallback(
+    (x: number) => {
+      if (trackWidth <= 0 || duration <= 0) return 0;
+      const ratio = Math.max(0, Math.min(1, x / trackWidth));
+      const time = ratio * duration;
+      return Math.max(0, Math.min(maxWatched, time));
+    },
+    [duration, maxWatched, trackWidth],
+  );
 
-  const pan = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: (event) => {
-        onSeek(positionFromX(event.nativeEvent.locationX));
-      },
-      onPanResponderMove: (event) => {
-        onSeek(positionFromX(event.nativeEvent.locationX));
-      },
-    }),
-  ).current;
+  const pan = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: () => true,
+        onPanResponderGrant: (event) => {
+          onSeek(positionFromX(event.nativeEvent.locationX));
+        },
+        onPanResponderMove: (event) => {
+          onSeek(positionFromX(event.nativeEvent.locationX));
+        },
+      }),
+    [onSeek, positionFromX],
+  );
 
   const onLayout = (event: LayoutChangeEvent) => {
-    trackWidth.current = event.nativeEvent.layout.width;
+    setTrackWidth(event.nativeEvent.layout.width);
   };
 
   const watchedRatio = duration > 0 ? Math.min(1, maxWatched / duration) : 0;

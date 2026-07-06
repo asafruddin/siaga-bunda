@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Alert, Modal, StyleSheet, Text, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { StatusBar } from 'expo-status-bar';
@@ -130,7 +131,9 @@ function VideoPlayer({
         </View>
         <Text style={styles.title}>{video.title}</Text>
         <Text style={styles.subtitle}>
-          Tonton sampai selesai untuk membuka jadwal posttest.
+          {video.is_last_video
+            ? 'Tonton sampai selesai untuk membuka jadwal posttest.'
+            : 'Tonton sampai selesai untuk melanjutkan ke materi berikutnya.'}
         </Text>
       </View>
 
@@ -163,6 +166,8 @@ function VideoPlayer({
             onToggleMute={() => {
               const next = !muted;
               try {
+                // Expo Video controls mute through its imperative player API.
+                // eslint-disable-next-line react-hooks/immutability
                 player.muted = next;
               } catch {
                 // Native player already released.
@@ -213,6 +218,8 @@ function VideoPlayer({
             onToggleMute={() => {
               const next = !muted;
               try {
+                // Expo Video controls mute through its imperative player API.
+                // eslint-disable-next-line react-hooks/immutability
                 player.muted = next;
               } catch {
                 // Native player already released.
@@ -249,7 +256,12 @@ function VideoPlayer({
       </View>
 
       <View style={styles.noSkipNote}>
-        <Text style={styles.noSkipIcon}>⌾</Text>
+        <MaterialCommunityIcons
+          accessible={false}
+          color={colors.primaryDark}
+          name="information-outline"
+          size={18}
+        />
         <Text style={styles.noSkipText}>
           Bagian yang belum ditonton tidak dapat dilewati, termasuk saat
           menggeser bilah waktu. Ibu tetap dapat mengulang bagian sebelumnya
@@ -352,6 +364,5 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     backgroundColor: colors.blue,
   },
-  noSkipIcon: { color: colors.primaryDark, fontSize: 16, fontWeight: '900' },
   noSkipText: { flex: 1, color: colors.muted, fontSize: 9, lineHeight: 14 },
 });

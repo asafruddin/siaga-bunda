@@ -1,6 +1,8 @@
 # Database schema
 
-The authoritative schema is [`supabase/migrations/202607030001_initial_schema.sql`](../supabase/migrations/202607030001_initial_schema.sql). It defines users, consented respondent profiles, seven ordered videos, separate pre/post questions, immutable attempts and answers, video progress, posttest schedules, audit logs, and export logs.
+The authoritative schema is the ordered migration set in [`supabase/migrations/`](../supabase/migrations/). It defines users, consented respondent profiles, seven ordered videos, separate pre/post questions, immutable attempts and answers, video progress, posttest schedules, audit logs, and export logs.
+
+Each video has 5 active, meeting-specific pretest questions and the same 25 active posttest questions. Question order is unique only within the active set. Replaced questions are deactivated instead of deleted so historical test answers keep their original question references.
 
 The API uses the service role and is the only writer. Anonymous database access is denied except for active video metadata. Researcher reporting uses `respondent_summary`, `video_monitoring`, `test_result_summary`, `test_comparison`, and anonymized `research_export` views.
 

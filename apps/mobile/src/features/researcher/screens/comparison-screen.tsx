@@ -1,8 +1,9 @@
 import { Text, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
+import Feather from '@expo/vector-icons/Feather';
 import { Button, Loading, Notice, Screen } from '@/components/ui';
-import { colors } from '@/theme';
 import { api } from '@/services/api';
+import { colors } from '@/theme';
 import { researcherStyles as s } from '../lib/styles';
 
 export function ComparisonScreen() {
@@ -26,7 +27,12 @@ export function ComparisonScreen() {
       <View style={s.pageHeading}>
         <View style={s.pageEyebrowRow}>
           <View style={[s.pageIconBox, { backgroundColor: '#FFF0D6' }]}>
-            <Text style={s.pageIconText}>↗</Text>
+            <Feather
+              accessible={false}
+              color={colors.primaryDark}
+              name="trending-up"
+              size={17}
+            />
           </View>
           <Text style={s.pageEyebrow}>DAMPAK EDUKASI</Text>
         </View>
@@ -39,9 +45,16 @@ export function ComparisonScreen() {
       {!q.isLoading && !q.error && valid.length ? (
         <View style={s.comparisonHero}>
           <View style={s.comparisonHeroIcon}>
-            <Text style={s.comparisonHeroIconText}>
-              {Number(overallImprovement) >= 0 ? '↗' : '↘'}
-            </Text>
+            <Feather
+              accessible={false}
+              color="white"
+              name={
+                Number(overallImprovement) >= 0
+                  ? 'trending-up'
+                  : 'trending-down'
+              }
+              size={29}
+            />
           </View>
           <View style={s.comparisonHeroCopy}>
             <Text style={s.comparisonHeroEyebrow}>PERUBAHAN RATA-RATA</Text>
@@ -121,7 +134,12 @@ export function ComparisonScreen() {
                 <View style={s.beforeAfterRow}>
                   <ScoreComparison label="Pretest" value={pretest} tone="pre" />
                   <View style={s.comparisonArrow}>
-                    <Text style={s.comparisonArrowText}>→</Text>
+                    <Feather
+                      accessible={false}
+                      color={colors.primary}
+                      name="arrow-right"
+                      size={18}
+                    />
                   </View>
                   <ScoreComparison
                     label="Posttest"
@@ -132,14 +150,12 @@ export function ComparisonScreen() {
 
                 {hasData ? (
                   <View style={s.improvementMessage}>
-                    <Text
-                      style={[
-                        s.improvementMessageIcon,
-                        !improved && { color: colors.danger },
-                      ]}
-                    >
-                      {improved ? '↗' : '↘'}
-                    </Text>
+                    <Feather
+                      accessible={false}
+                      color={improved ? colors.success : colors.danger}
+                      name={improved ? 'trending-up' : 'trending-down'}
+                      size={17}
+                    />
                     <Text style={s.improvementMessageText}>
                       {improved ? 'Peningkatan' : 'Penurunan'} sebesar{' '}
                       <Text
@@ -164,7 +180,12 @@ export function ComparisonScreen() {
       ) : (
         <View style={s.emptyState}>
           <View style={[s.emptyStateIcon, { backgroundColor: '#FFF0D6' }]}>
-            <Text style={s.emptyStateIconText}>↗</Text>
+            <Feather
+              accessible={false}
+              color={colors.primaryDark}
+              name="trending-up"
+              size={27}
+            />
           </View>
           <Text style={s.emptyStateTitle}>Belum ada data perbandingan</Text>
           <Text style={s.emptyStateText}>

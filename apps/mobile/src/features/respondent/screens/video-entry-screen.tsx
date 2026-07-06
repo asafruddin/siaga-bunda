@@ -14,7 +14,12 @@ export function VideoEntryScreen() {
   });
   useEffect(() => {
     const status = q.data?.progress?.status as VideoStatus | undefined;
+    const isLastVideo = q.data?.is_last_video ?? false;
     if (!status) return;
+    if (status === 'completed' && !isLastVideo) {
+      router.replace('/respondent/dashboard' as never);
+      return;
+    }
     const path =
       status === 'pretest_required'
         ? 'pretest-intro'

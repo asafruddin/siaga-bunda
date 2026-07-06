@@ -11,5 +11,8 @@ export const colors = {
   border: '#E8DDE2',
   danger: '#B42318',
   success: '#287D5A',
+  successDark: '#245E49',
+  successSoft: '#E2F2E9',
+  successMuted: '#E8F4ED',
   warning: '#9A6700',
 };
