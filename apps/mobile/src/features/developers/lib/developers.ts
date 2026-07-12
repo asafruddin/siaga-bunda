@@ -20,7 +20,7 @@ export const developers: Developer[] = [
     nomor_induk: { jenis: 'NIDN', nomor: '4025077301' },
     instansi: 'Poltekkes Kemenkes Manado',
     institutionLogo: logoPkManado,
-    photo: require('../../../../assets/developers/yulien_adam.jfif'),
+    photo: require('../../../../assets/developers/yulien_adam.png'),
   },
   {
     nama_peneliti: 'Dian Pratiwi, S.S.T., M.Keb.',
@@ -34,13 +34,13 @@ export const developers: Developer[] = [
     nomor_induk: { jenis: 'NIDN', nomor: '0426028703' },
     instansi: 'Poltekkes Kemenkes Bandung',
     institutionLogo: logoPkBandung,
-    photo: require('../../../../assets/developers/bayu_irianti.jfif'),
+    photo: require('../../../../assets/developers/bayu_irianti.png'),
   },
   {
     nama_peneliti: 'Senny Rondonuwu, M.Keb.',
     nomor_induk: { jenis: 'NIP', nomor: '197912032002122001' },
     instansi: 'Poltekkes Kemenkes Manado',
     institutionLogo: logoPkManado,
-    photo: require('../../../../assets/developers/senny_rondonuwu.jfif'),
+    photo: require('../../../../assets/developers/senny_rondonuwu.png'),
   },
 ];

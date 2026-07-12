@@ -15,4 +15,4 @@ Implemented endpoints:
 - `POST /videos/:id/pretest/submit`, `POST /videos/:id/posttest/submit`
 - `GET /researcher/overview|respondents|respondents/:id|videos/monitoring`
 - `GET /researcher/results/pretest|posttest|comparison`
-- `POST /researcher/export`
+- `POST /researcher/export` returns a raw `.xlsx` workbook

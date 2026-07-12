@@ -7,6 +7,11 @@
     "orientation": "default",
     "scheme": "siagabunda",
     "userInterfaceStyle": "light",
+    "androidStatusBar": {
+      "backgroundColor": "#FFF9FB",
+      "barStyle": "dark-content",
+      "translucent": false
+    },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "id.siagabunda.mobile",
@@ -33,7 +38,19 @@
           "backgroundColor": "#FFF9FB",
           "image": "./assets/app/splash_logo.png",
           "imageWidth": 280,
-          "resizeMode": "contain"
+          "resizeMode": "contain",
+          "android": {
+            "image": "./assets/app/launcher_icon_square.png",
+            "imageWidth": 180,
+            "resizeMode": "contain",
+            "backgroundColor": "#FFF9FB"
+          },
+          "ios": {
+            "image": "./assets/app/splash_logo.png",
+            "imageWidth": 280,
+            "resizeMode": "contain",
+            "backgroundColor": "#FFF9FB"
+          }
         }
       ]
     ],

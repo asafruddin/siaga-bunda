@@ -113,7 +113,7 @@ export function ResearcherHome() {
         />
       ),
       label: 'Ekspor Data',
-      description: 'Unduh dataset penelitian dalam format CSV',
+      description: 'Unduh dataset penelitian dalam format Excel',
       path: '/researcher/export',
       tone: '#ECEFF7',
     },

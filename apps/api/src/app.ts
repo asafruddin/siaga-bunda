@@ -1,7 +1,9 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
+import { z } from 'zod';
 import {
+  VIDEO_STATUSES,
   calculateHpl,
   calculatePregnancyWeeks,
   registrationSchema,
@@ -22,8 +24,25 @@ import {
   researcher,
   row,
 } from './lib.js';
+import { createWorkbook } from './xlsx.js';
 
 type Variables = { user: { id: string; role: Role } };
+const exportSchema = z.object({
+  exportType: z
+    .enum([
+      'full_dataset',
+      'respondent_data',
+      'video_progress',
+      'pretest',
+      'posttest',
+    ])
+    .optional(),
+  videoId: z.string().uuid().optional(),
+  videoNumber: z.number().int().min(1).max(7).optional(),
+  status: z.enum(VIDEO_STATUSES).optional(),
+  dateFrom: z.string().date().optional(),
+  dateTo: z.string().date().optional(),
+});
 export const app = new Hono<{ Variables: Variables }>().basePath('/api');
 app.use('*', secureHeaders());
 app.use(
@@ -830,7 +849,15 @@ app.get('/researcher/results/:type', async (c) => {
   );
 });
 app.post('/researcher/export', async (c) => {
-  const filters = await c.req.json();
+  const body = await c.req.json().catch(() => null);
+  const parsed = exportSchema.safeParse(body ?? {});
+  if (!parsed.success)
+    return fail(
+      c,
+      'VALIDATION_ERROR',
+      parsed.error.issues[0]?.message ?? 'Filter ekspor tidak valid.',
+    );
+  const filters = parsed.data;
   const type = filters.exportType ?? 'full_dataset';
   let query = db().from('research_export').select('*');
   if (filters.videoId) query = query.eq('video_id', filters.videoId);
@@ -877,11 +904,7 @@ app.post('/researcher/export', async (c) => {
     ],
   };
   const keys = columns[type] ?? columns.full_dataset;
-  const escape = (v: unknown) => `"${String(v ?? '').replaceAll('"', '""')}"`;
-  const csv = [
-    keys.join(','),
-    ...rows.map((r) => keys.map((k) => escape(r[k])).join(',')),
-  ].join('\n');
+  const workbook = createWorkbook(rows, keys);
   await db()
     .from('export_logs')
     .insert({
@@ -896,10 +919,17 @@ app.post('/researcher/export', async (c) => {
     undefined,
     filters,
   );
-  c.header('Content-Type', 'text/csv; charset=utf-8');
+  c.header(
+    'Content-Type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  );
   c.header(
     'Content-Disposition',
-    `attachment; filename="siaga-bunda-${Date.now()}.csv"`,
+    `attachment; filename="siaga-bunda-${Date.now()}.xlsx"`,
   );
-  return c.body(`\ufeff${csv}`);
+  const buffer = workbook.buffer.slice(
+    workbook.byteOffset,
+    workbook.byteOffset + workbook.byteLength,
+  );
+  return c.body(buffer);
 });

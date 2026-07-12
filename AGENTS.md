@@ -197,7 +197,8 @@ Every JSON response follows one shape (types in `@siaga/shared`):
 { "success": false, "error": { "code": string, "message": string } }
 ```
 
-`export` is the one exception: it returns raw CSV (`text/csv`) with a BOM.
+`export` is the one exception: it returns a raw Excel workbook
+(`application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`).
 
 ### 8.2 Mobile client
 
@@ -218,8 +219,8 @@ await put('/respondents/me', patch); // PUT
 - The base URL is `EXPO_PUBLIC_API_BASE_URL`. Emulator/device notes: iOS sim
   `http://localhost:3000/api`, Android emu `http://10.0.2.2:3000/api`, physical device
   uses the machine LAN IP.
-- CSV export is the documented exception that uses raw `fetch` (see `export-screen.tsx`)
-  because it streams a file rather than JSON.
+- Excel export is the documented exception that uses raw `fetch` (see
+  `export-screen.tsx`) because it streams a file rather than JSON.
 
 ### 8.3 Backend routes (`apps/api/src/app.ts`)
 

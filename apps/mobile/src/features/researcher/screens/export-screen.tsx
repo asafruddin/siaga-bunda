@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Alert, Pressable, Text, View } from 'react-native';
+import { Alert, Linking, Platform, Pressable, Text, View } from 'react-native';
 import Feather from '@expo/vector-icons/Feather';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as FileSystem from 'expo-file-system/legacy';
-import * as Sharing from 'expo-sharing';
+import * as IntentLauncher from 'expo-intent-launcher';
 import { Button, Field, Screen } from '@/components/ui';
 import { colors } from '@/theme';
 import { useSession } from '@/services/session';
@@ -51,6 +51,87 @@ const statuses = [
   { value: 'completed', label: 'Selesai' },
 ];
 
+const EXCEL_MIME_TYPE =
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+const ANDROID_FLAG_GRANT_READ_URI_PERMISSION = 1;
+
+function startsWithText(bytes: Uint8Array, value: string) {
+  return value
+    .split('')
+    .every((char, index) => bytes[index] === char.charCodeAt(0));
+}
+
+function arrayBufferToBase64(buffer: ArrayBuffer) {
+  const bytes = new Uint8Array(buffer);
+  const chunkSize = 0x8000;
+  let binary = '';
+
+  for (let index = 0; index < bytes.length; index += chunkSize) {
+    const chunk = bytes.subarray(index, index + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+
+  return btoa(binary);
+}
+
+function isExcelWorkbook(buffer: ArrayBuffer) {
+  const bytes = new Uint8Array(buffer);
+  return (
+    bytes.length > 4 &&
+    bytes[0] === 0x50 &&
+    bytes[1] === 0x4b &&
+    [0x03, 0x05, 0x07].includes(bytes[2]) &&
+    [0x04, 0x06, 0x08].includes(bytes[3])
+  );
+}
+
+function invalidWorkbookMessage(
+  buffer: ArrayBuffer,
+  contentType: string | null,
+) {
+  const bytes = new Uint8Array(buffer);
+  const normalizedType = contentType?.split(';')[0]?.trim().toLowerCase();
+  let format = normalizedType || 'format tidak dikenal';
+
+  if (normalizedType === 'text/csv' || startsWithText(bytes, 'respondent_')) {
+    format = 'CSV';
+  } else if (
+    normalizedType === 'application/json' ||
+    startsWithText(bytes, '{"')
+  ) {
+    format = 'JSON';
+  } else if (
+    normalizedType === 'text/html' ||
+    startsWithText(bytes, '<!DOCTYPE') ||
+    startsWithText(bytes, '<html')
+  ) {
+    format = 'HTML';
+  }
+
+  return `Server mengirim ${format}, bukan file Excel. Pastikan API yang dipakai aplikasi sudah diperbarui ke endpoint ekspor XLSX.`;
+}
+
+async function previewExcelFile(uri: string) {
+  try {
+    const previewUri = await FileSystem.getContentUriAsync(uri);
+    if (Platform.OS === 'android') {
+      await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
+        data: previewUri,
+        type: EXCEL_MIME_TYPE,
+        flags: ANDROID_FLAG_GRANT_READ_URI_PERMISSION,
+      });
+      return;
+    }
+
+    await Linking.openURL(previewUri);
+  } catch {
+    Alert.alert(
+      'Pratinjau tidak tersedia',
+      'Tidak ada aplikasi yang dapat membuka file Excel ini di perangkat.',
+    );
+  }
+}
+
 export function ExportScreen() {
   const [type, setType] = useState('full_dataset');
   const [dateFrom, setFrom] = useState('');
@@ -72,6 +153,7 @@ export function ExportScreen() {
         {
           method: 'POST',
           headers: {
+            Accept: EXCEL_MIME_TYPE,
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
@@ -88,17 +170,24 @@ export function ExportScreen() {
         const body = await response.json();
         throw new Error(body.error?.message ?? 'Ekspor gagal.');
       }
-      const csv = await response.text();
-      const uri = `${FileSystem.cacheDirectory}siaga-bunda-${Date.now()}.csv`;
-      await FileSystem.writeAsStringAsync(uri, csv, {
-        encoding: FileSystem.EncodingType.UTF8,
+      const contentType = response.headers.get('content-type');
+      const workbook = await response.arrayBuffer();
+      if (!isExcelWorkbook(workbook)) {
+        throw new Error(invalidWorkbookMessage(workbook, contentType));
+      }
+      const uri = `${FileSystem.documentDirectory}siaga-bunda-${Date.now()}.xlsx`;
+      await FileSystem.writeAsStringAsync(uri, arrayBufferToBase64(workbook), {
+        encoding: FileSystem.EncodingType.Base64,
       });
-      if (await Sharing.isAvailableAsync())
-        await Sharing.shareAsync(uri, {
-          mimeType: 'text/csv',
-          dialogTitle: 'Bagikan data penelitian',
-        });
-      else Alert.alert('Ekspor selesai', uri);
+      Alert.alert('Ekspor selesai', `File Excel tersimpan di:\n${uri}`, [
+        { text: 'Tutup', style: 'cancel' },
+        {
+          text: 'Pratinjau',
+          onPress: () => {
+            void previewExcelFile(uri);
+          },
+        },
+      ]);
     } catch (error) {
       Alert.alert(
         'Ekspor gagal',
@@ -125,7 +214,7 @@ export function ExportScreen() {
         </View>
         <Text style={s.pageTitle}>Ekspor Data</Text>
         <Text style={s.pageSubtitle}>
-          Pilih isi dan filter data sebelum membuat file CSV.
+          Pilih isi dan filter data sebelum membuat file Excel.
         </Text>
       </View>
 
@@ -266,7 +355,7 @@ export function ExportScreen() {
 
       <View style={s.exportSummary}>
         <View style={s.exportSummaryIcon}>
-          <Text style={s.exportSummaryIconText}>CSV</Text>
+          <Text style={s.exportSummaryIconText}>XLSX</Text>
         </View>
         <View style={s.exportSummaryCopy}>
           <Text style={s.exportSummaryTitle}>{selectedDataset.title}</Text>
@@ -295,7 +384,7 @@ export function ExportScreen() {
       </View>
 
       <Button disabled={busy} onPress={run}>
-        {busy ? 'Membuat file…' : 'Buat dan Bagikan CSV'}
+        {busy ? 'Membuat file…' : 'Buat dan Simpan Excel'}
       </Button>
     </Screen>
   );
