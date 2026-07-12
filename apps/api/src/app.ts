@@ -558,6 +558,7 @@ app.post('/videos/:id/progress', auth, async (c) => {
   const p = await progressFor(respondent.id, video.id);
   if (!p || p.status !== 'video_in_progress')
     return fail(c, 'INVALID_STATE', 'Video belum dimulai.', 409);
+  const allowVideoSkip = process.env.ALLOW_VIDEO_SKIP === 'true';
   const elapsed = Math.max(
     1,
     (Date.now() -
@@ -565,8 +566,9 @@ app.post('/videos/:id/progress', auth, async (c) => {
       1000,
   );
   if (
+    !allowVideoSkip &&
     parsed.data.maxWatchedSecond >
-    Number(p.max_watched_seconds) + elapsed + 5
+      Number(p.max_watched_seconds) + elapsed + 5
   )
     return fail(
       c,
@@ -575,8 +577,9 @@ app.post('/videos/:id/progress', auth, async (c) => {
       422,
     );
   if (
+    !allowVideoSkip &&
     parsed.data.durationWatchedSeconds >
-    Number(p.duration_watched_seconds) + elapsed + 5
+      Number(p.duration_watched_seconds) + elapsed + 5
   )
     return fail(c, 'INVALID_WATCH_TIME', 'Durasi menonton tidak valid.', 422);
   const max = Math.min(

@@ -75,7 +75,22 @@ function VideoPlayer({
     seekTo,
     skipBackward,
     skipForward,
+    skipToEnd,
   } = useVideoWatchProgress({ player, video });
+
+  async function skipVideo() {
+    try {
+      setBusy(true);
+      await skipToEnd();
+    } catch (e) {
+      Alert.alert(
+        'Lewati video gagal',
+        e instanceof Error ? e.message : 'Coba lagi.',
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function finish() {
     try {
@@ -268,6 +283,16 @@ function VideoPlayer({
           atau menjeda video kapan saja.
         </Text>
       </View>
+
+      {__DEV__ ? (
+        <Button
+          disabled={busy || completed}
+          onPress={skipVideo}
+          variant="secondary"
+        >
+          Lewati video (uji)
+        </Button>
+      ) : null}
 
       <Button disabled={!completed || busy} onPress={finish}>
         {busy

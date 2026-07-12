@@ -199,6 +199,24 @@ export function useVideoWatchProgress({
     setPlaying(true);
   }, [player, playing, saveProgress]);
 
+  const skipToEnd = useCallback(async () => {
+    const end = video.duration_seconds;
+    maxRef.current = end;
+    watchedRef.current = end;
+    currentTimeRef.current = end;
+    last.current = end;
+    setMax(end);
+    setWatched(end);
+    setCurrentTime(end);
+    withPlayer(player, () => {
+      player.pause();
+      player.currentTime = end;
+    });
+    playingRef.current = false;
+    setPlaying(false);
+    await saveProgress();
+  }, [player, saveProgress, video.duration_seconds]);
+
   const completed =
     max >= video.duration_seconds - 2 &&
     watched >= video.duration_seconds * 0.9;
@@ -216,5 +234,6 @@ export function useVideoWatchProgress({
     seekTo,
     skipBackward,
     skipForward,
+    skipToEnd,
   };
 }
