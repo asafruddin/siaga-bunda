@@ -547,6 +547,38 @@ app.post('/videos/:id/start', auth, async (c) => {
   );
   return ok(c, updated);
 });
+app.post('/videos/:id/dev-skip', auth, async (c) => {
+  if (process.env.ALLOW_VIDEO_SKIP !== 'true')
+    return fail(c, 'NOT_ALLOWED', 'Lewati video tidak diizinkan.', 403);
+  const respondent = await respondentFor(c.get('user').id);
+  const video = row(
+    await db().from('videos').select('*').eq('id', c.req.param('id')).single(),
+  ) as any;
+  const p = await progressFor(respondent.id, video.id);
+  if (!p || p.status !== 'video_in_progress')
+    return fail(c, 'INVALID_STATE', 'Video belum dimulai.', 409);
+  const updated = row(
+    await db()
+      .from('video_progress')
+      .update({
+        max_watched_seconds: video.duration_seconds,
+        duration_watched_seconds: video.duration_seconds,
+        completion_percentage: 100,
+        last_checkpoint_at: new Date().toISOString(),
+      })
+      .eq('id', p.id)
+      .select('*')
+      .single(),
+  );
+  await audit(
+    'video_progress_updated',
+    c.get('user').id,
+    respondent.id,
+    video.id,
+    { devSkip: true },
+  );
+  return ok(c, updated);
+});
 app.post('/videos/:id/progress', auth, async (c) => {
   const parsed = progressSchema.safeParse(await c.req.json());
   if (!parsed.success)

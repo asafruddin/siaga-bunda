@@ -214,8 +214,12 @@ export function useVideoWatchProgress({
     });
     playingRef.current = false;
     setPlaying(false);
+    if (__DEV__) {
+      await post(`/videos/${video.id}/dev-skip`);
+      return;
+    }
     await saveProgress();
-  }, [player, saveProgress, video.duration_seconds]);
+  }, [player, saveProgress, video.duration_seconds, video.id]);
 
   const completed =
     max >= video.duration_seconds - 2 &&
