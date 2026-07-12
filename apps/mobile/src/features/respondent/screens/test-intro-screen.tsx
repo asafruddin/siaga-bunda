@@ -1,10 +1,12 @@
-import { Text, View } from 'react-native';
+import { Image, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Button, Screen } from '@/components/ui';
 import { colors } from '@/theme';
 import { respondentStyles as s } from '../lib/styles';
+
+const pretestIllustration = require('../../../../assets/app/ilustrations/pregnant-3.png');
 
 export function TestIntroScreen({ type }: { type: 'pretest' | 'posttest' }) {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -51,19 +53,42 @@ export function TestIntroScreen({ type }: { type: 'pretest' | 'posttest' }) {
       <View
         style={[
           s.testIntroHero,
+          isPretest ? s.testIntroHeroPretest : s.testIntroHeroPosttest,
           !isPretest && { backgroundColor: colors.successDark },
         ]}
       >
-        <View style={s.testIntroHeroIcon}>
-          <MaterialIcons
-            accessible={false}
-            color="white"
-            name={isPretest ? 'quiz' : 'fact-check'}
-            size={24}
-          />
-        </View>
-        <Text style={s.testIntroHeroValue}>{questionCount}</Text>
-        <Text style={s.testIntroHeroLabel}>pertanyaan • {duration}</Text>
+        {isPretest ? (
+          <>
+            <View style={s.testIntroHeroVisual}>
+              <Image
+                accessibilityIgnoresInvertColors
+                accessible={false}
+                resizeMode="contain"
+                source={pretestIllustration}
+                style={s.testIntroHeroImage}
+              />
+            </View>
+            <View style={s.testIntroHeroSummary}>
+              <Text style={s.testIntroHeroKicker}>Siap mulai?</Text>
+              <Text style={s.testIntroHeroValue}>{questionCount}</Text>
+              <Text style={s.testIntroHeroLabel}>pertanyaan</Text>
+              <Text style={s.testIntroHeroDuration}>{duration}</Text>
+            </View>
+          </>
+        ) : (
+          <>
+            <View style={s.testIntroHeroIcon}>
+              <MaterialIcons
+                accessible={false}
+                color="white"
+                name="fact-check"
+                size={24}
+              />
+            </View>
+            <Text style={s.testIntroHeroValue}>{questionCount}</Text>
+            <Text style={s.testIntroHeroLabel}>pertanyaan • {duration}</Text>
+          </>
+        )}
       </View>
 
       <View style={s.instructionCard}>

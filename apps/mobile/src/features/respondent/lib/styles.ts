@@ -21,10 +21,28 @@ export const respondentStyles = StyleSheet.create({
   testIntroTitle: { color: colors.text, fontSize: 30, fontWeight: '900' },
   testIntroSubtitle: { color: colors.muted, fontSize: 13, lineHeight: 20 },
   testIntroHero: {
-    alignItems: 'center',
-    paddingVertical: 23,
     borderRadius: 22,
     backgroundColor: colors.primaryDark,
+  },
+  testIntroHeroPretest: {
+    minHeight: 188,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    padding: 18,
+  },
+  testIntroHeroPosttest: {
+    alignItems: 'center',
+    paddingVertical: 23,
+  },
+  testIntroHeroVisual: {
+    width: 124,
+    height: 148,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255,255,255,0.13)',
   },
   testIntroHeroIcon: {
     width: 49,
@@ -35,8 +53,28 @@ export const respondentStyles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.14)',
   },
-  testIntroHeroValue: { color: 'white', fontSize: 35, fontWeight: '900' },
-  testIntroHeroLabel: { color: '#EAD9E1', fontSize: 11 },
+  testIntroHeroImage: {
+    width: 94,
+    height: 142,
+  },
+  testIntroHeroSummary: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  testIntroHeroKicker: {
+    marginBottom: 8,
+    color: colors.pink,
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  testIntroHeroValue: { color: 'white', fontSize: 42, fontWeight: '900' },
+  testIntroHeroLabel: {
+    marginTop: -3,
+    color: colors.surface,
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  testIntroHeroDuration: { marginTop: 8, color: colors.pink, fontSize: 11 },
   instructionCard: {
     paddingHorizontal: 15,
     borderRadius: 20,
