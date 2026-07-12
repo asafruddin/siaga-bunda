@@ -27,6 +27,27 @@ import {
 import { createWorkbook } from './xlsx.js';
 
 type Variables = { user: { id: string; role: Role } };
+type ExportType =
+  | 'full_dataset'
+  | 'respondent_data'
+  | 'video_progress'
+  | 'pretest'
+  | 'posttest';
+type ExportFilters = {
+  exportType?: ExportType;
+  videoId?: string;
+  videoNumber?: number;
+  status?: string;
+  dateFrom?: string;
+  dateTo?: string;
+};
+type ExportSheet = {
+  name: string;
+  rows: Record<string, unknown>[];
+  keys: string[];
+  headers: string[];
+};
+
 const exportSchema = z.object({
   exportType: z
     .enum([
@@ -43,6 +64,101 @@ const exportSchema = z.object({
   dateFrom: z.string().date().optional(),
   dateTo: z.string().date().optional(),
 });
+
+const exportColumns = {
+  respondents: [
+    ['respondent_code', 'Kode Responden'],
+    ['name', 'Nama'],
+    ['phone_number', 'Nomor Telepon'],
+    ['address', 'Alamat'],
+    ['age', 'Usia'],
+    ['education', 'Pendidikan'],
+    ['occupation', 'Pekerjaan'],
+    ['hpht', 'HPHT'],
+    ['hpl', 'HPL'],
+    ['pregnancy_age_weeks', 'Usia Kehamilan (minggu)'],
+    ['number_of_children', 'Jumlah Anak'],
+    ['medical_history', 'Riwayat Medis'],
+    ['birth_history', 'Riwayat Persalinan'],
+    ['husband_support', 'Dukungan Suami/Keluarga'],
+    ['pregnancy_complication_history', 'Riwayat Komplikasi Kehamilan'],
+    ['consent_accepted_at', 'Tanggal Persetujuan'],
+    ['registered_at', 'Tanggal Registrasi'],
+    ['updated_at', 'Terakhir Diperbarui'],
+    ['current_status', 'Status Saat Ini'],
+    ['completed_videos', 'Video Selesai'],
+    ['progress_percentage', 'Progres (%)'],
+  ],
+  progress: [
+    ['respondent_code', 'Kode Responden'],
+    ['name', 'Nama'],
+    ['phone_number', 'Nomor Telepon'],
+    ['video_number', 'Nomor Video'],
+    ['video_title', 'Judul Video'],
+    ['duration_seconds', 'Durasi Video (detik)'],
+    ['status', 'Status'],
+    ['completion_percentage', 'Progres Video (%)'],
+    ['max_watched_seconds', 'Detik Terjauh Ditonton'],
+    ['duration_watched_seconds', 'Total Detik Ditonton'],
+    ['watch_started_at', 'Mulai Menonton'],
+    ['watch_completed_at', 'Selesai Menonton'],
+    ['last_checkpoint_at', 'Checkpoint Terakhir'],
+    ['posttest_available_at', 'Posttest Tersedia Pada'],
+    ['posttest_schedule_status', 'Status Jadwal Posttest'],
+    ['reminder_sent_at', 'Pengingat Dikirim Pada'],
+    ['registered_at', 'Tanggal Registrasi'],
+  ],
+  tests: [
+    ['respondent_code', 'Kode Responden'],
+    ['name', 'Nama'],
+    ['phone_number', 'Nomor Telepon'],
+    ['video_number', 'Nomor Video'],
+    ['video_title', 'Judul Video'],
+    ['test_type', 'Jenis Tes'],
+    ['score', 'Nilai'],
+    ['total_questions', 'Jumlah Pertanyaan'],
+    ['correct_count', 'Jawaban Benar'],
+    ['submitted_at', 'Dikirim Pada'],
+    ['registered_at', 'Tanggal Registrasi'],
+  ],
+  answers: [
+    ['respondent_code', 'Kode Responden'],
+    ['name', 'Nama'],
+    ['phone_number', 'Nomor Telepon'],
+    ['video_number', 'Nomor Video'],
+    ['video_title', 'Judul Video'],
+    ['test_type', 'Jenis Tes'],
+    ['display_order', 'Urutan Pertanyaan'],
+    ['question_text', 'Pertanyaan'],
+    ['option_a', 'Pilihan A'],
+    ['option_b', 'Pilihan B'],
+    ['option_c', 'Pilihan C'],
+    ['option_d', 'Pilihan D'],
+    ['selected_answer', 'Jawaban Dipilih'],
+    ['correct_answer', 'Jawaban Benar'],
+    ['is_correct', 'Benar'],
+    ['score', 'Nilai Tes'],
+    ['submitted_at', 'Tes Dikirim Pada'],
+    ['registered_at', 'Tanggal Registrasi'],
+  ],
+} satisfies Record<string, [string, string][]>;
+
+const keys = (columns: [string, string][]) => columns.map(([key]) => key);
+const headers = (columns: [string, string][]) =>
+  columns.map(([, header]) => header);
+
+function applyRegistrationFilters<
+  T extends {
+    gte: (column: string, value: string) => T;
+    lte: (column: string, value: string) => T;
+  },
+>(query: T, filters: ExportFilters) {
+  let next = query;
+  if (filters.dateFrom) next = next.gte('registered_at', filters.dateFrom);
+  if (filters.dateTo)
+    next = next.lte('registered_at', `${filters.dateTo}T23:59:59Z`);
+  return next;
+}
 export const app = new Hono<{ Variables: Variables }>().basePath('/api');
 app.use('*', secureHeaders());
 app.use(
@@ -859,52 +975,107 @@ app.post('/researcher/export', async (c) => {
     );
   const filters = parsed.data;
   const type = filters.exportType ?? 'full_dataset';
-  let query = db().from('research_export').select('*');
-  if (filters.videoId) query = query.eq('video_id', filters.videoId);
-  if (filters.videoNumber)
-    query = query.eq('video_number', filters.videoNumber);
-  if (filters.status) query = query.eq('status', filters.status);
-  if (filters.dateFrom) query = query.gte('registered_at', filters.dateFrom);
-  if (filters.dateTo)
-    query = query.lte('registered_at', `${filters.dateTo}T23:59:59Z`);
-  const rows = row(await query) as Record<string, unknown>[];
-  const columns: Record<string, string[]> = {
-    respondent_data: ['respondent_code', 'registered_at'],
-    video_progress: [
-      'respondent_code',
-      'video_number',
-      'status',
-      'completion_percentage',
-      'watch_completed_at',
-    ],
-    pretest: [
-      'respondent_code',
-      'video_number',
-      'pretest_score',
-      'registered_at',
-    ],
-    posttest: [
-      'respondent_code',
-      'video_number',
-      'posttest_score',
-      'posttest_available_at',
-      'posttest_submitted_at',
-    ],
-    full_dataset: [
-      'respondent_code',
-      'video_number',
-      'status',
-      'completion_percentage',
-      'pretest_score',
-      'posttest_score',
-      'registered_at',
-      'watch_completed_at',
-      'posttest_available_at',
-      'posttest_submitted_at',
-    ],
+  const client = db();
+
+  const respondentSheet = async (): Promise<ExportSheet> => {
+    let query = applyRegistrationFilters(
+      client
+        .from('research_export_respondents')
+        .select('*')
+        .order('registered_at', { ascending: false }),
+      filters,
+    );
+    if (filters.status) query = query.eq('current_status', filters.status);
+    return {
+      name: 'Responden',
+      rows: row(await query) as Record<string, unknown>[],
+      keys: keys(exportColumns.respondents),
+      headers: headers(exportColumns.respondents),
+    };
   };
-  const keys = columns[type] ?? columns.full_dataset;
-  const workbook = createWorkbook(rows, keys);
+
+  const progressSheet = async (): Promise<ExportSheet> => {
+    let query = applyRegistrationFilters(
+      client
+        .from('research_export_video_progress')
+        .select('*')
+        .order('registered_at', { ascending: false })
+        .order('video_number', { ascending: true }),
+      filters,
+    );
+    if (filters.videoNumber)
+      query = query.eq('video_number', filters.videoNumber);
+    if (filters.videoId) query = query.eq('video_id', filters.videoId);
+    if (filters.status) query = query.eq('status', filters.status);
+    return {
+      name: 'Progres Video',
+      rows: row(await query) as Record<string, unknown>[],
+      keys: keys(exportColumns.progress),
+      headers: headers(exportColumns.progress),
+    };
+  };
+
+  const testsSheet = async (
+    testType?: 'pretest' | 'posttest',
+  ): Promise<ExportSheet> => {
+    let query = applyRegistrationFilters(
+      client
+        .from('research_export_test_attempts')
+        .select('*')
+        .order('submitted_at', { ascending: false }),
+      filters,
+    );
+    if (filters.videoNumber)
+      query = query.eq('video_number', filters.videoNumber);
+    if (filters.videoId) query = query.eq('video_id', filters.videoId);
+    if (testType) query = query.eq('test_type', testType);
+    return {
+      name:
+        testType === 'pretest'
+          ? 'Hasil Pretest'
+          : testType === 'posttest'
+            ? 'Hasil Posttest'
+            : 'Hasil Tes',
+      rows: row(await query) as Record<string, unknown>[],
+      keys: keys(exportColumns.tests),
+      headers: headers(exportColumns.tests),
+    };
+  };
+
+  const answersSheet = async (): Promise<ExportSheet> => {
+    let query = applyRegistrationFilters(
+      client
+        .from('research_export_test_answers')
+        .select('*')
+        .order('submitted_at', { ascending: false })
+        .order('display_order', { ascending: true }),
+      filters,
+    );
+    if (filters.videoNumber)
+      query = query.eq('video_number', filters.videoNumber);
+    if (filters.videoId) query = query.eq('video_id', filters.videoId);
+    return {
+      name: 'Jawaban Tes',
+      rows: row(await query) as Record<string, unknown>[],
+      keys: keys(exportColumns.answers),
+      headers: headers(exportColumns.answers),
+    };
+  };
+
+  const sheets =
+    type === 'full_dataset'
+      ? await Promise.all([
+          respondentSheet(),
+          progressSheet(),
+          testsSheet(),
+          answersSheet(),
+        ])
+      : type === 'respondent_data'
+        ? [await respondentSheet()]
+        : type === 'video_progress'
+          ? [await progressSheet()]
+          : [await testsSheet(type)];
+  const workbook = createWorkbook(sheets);
   await db()
     .from('export_logs')
     .insert({

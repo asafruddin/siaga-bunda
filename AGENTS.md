@@ -15,7 +15,7 @@ monitoring**. Two roles use the system:
 - **Respondent** (pregnant mother): registers, watches 7 ordered education videos, and
   completes a pretest before and a posttest after each video.
 - **Researcher**: logs in to monitor respondents, view aggregate results, and export
-  anonymized data.
+  sensitive researcher-only data.
 
 The core respondent state machine (enforced **only** by the API) is:
 
@@ -248,8 +248,9 @@ await put('/respondents/me', patch); // PUT
   never appear in the mobile app or any `EXPO_PUBLIC_*` variable.
 - Mobile only ever holds the app JWT (in SecureStore) and public anon values.
 - `JWT_SECRET` must be strong and environment-specific.
-- Researcher exports use anonymized `respondent_code` (hashed) — never export direct
-  identifiers.
+- Researcher exports may include direct respondent identifiers (name, phone, address)
+  and must remain researcher-only. Do not export raw internal UUIDs, auth IDs, service
+  keys, or Expo push tokens.
 - Enforce authorization on the server. Do not rely on hiding UI as a security measure.
 
 ---
@@ -321,7 +322,7 @@ Supabase SQL editor.
   (`vitest`). Add tests for new shared functions and critical API behavior.
 - High-risk manual scenarios (verify before release): forward-seek attempts, app
   background/resume during playback, duplicate test submission, early posttest access,
-  role escalation, expired JWT, pagination, export anonymization.
+  role escalation, expired JWT, pagination, identifiable export access control.
 - For the 7-day flow, set `POSTTEST_DELAY_DAYS=0` **only** in a disposable environment.
 
 ---

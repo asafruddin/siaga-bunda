@@ -1,6 +1,12 @@
 const encoder = new TextEncoder();
 
 type WorkbookCell = unknown;
+type WorkbookSheet = {
+  name: string;
+  rows: Record<string, unknown>[];
+  keys: string[];
+  headers?: string[];
+};
 
 const crcTable = new Uint32Array(256);
 for (let i = 0; i < crcTable.length; i += 1) {
@@ -65,6 +71,11 @@ function cell(value: WorkbookCell, columnIndex: number, rowIndex: number) {
     return `<c r="${reference}" t="b"><v>${value ? 1 : 0}</v></c>`;
   }
   return `<c r="${reference}" t="inlineStr"><is><t>${xml(value)}</t></is></c>`;
+}
+
+function sheetName(value: string) {
+  const cleaned = value.replace(/[\[\]:*?/\\]/g, ' ').trim();
+  return xml((cleaned || 'Sheet').slice(0, 31));
 }
 
 function worksheetXml(
@@ -174,10 +185,47 @@ function zip(files: { name: string; content: string }[]) {
 }
 
 export function createWorkbook(
-  rows: Record<string, unknown>[],
-  keys: string[],
+  rowsOrSheets: Record<string, unknown>[] | WorkbookSheet[],
+  keys?: string[],
   headers = keys,
 ) {
+  const sheets: WorkbookSheet[] = keys
+    ? [
+        {
+          name: 'Data Penelitian',
+          rows: rowsOrSheets as Record<string, unknown>[],
+          keys,
+          headers,
+        },
+      ]
+    : (rowsOrSheets as WorkbookSheet[]);
+  const workbookSheets = sheets.length
+    ? sheets
+    : [{ name: 'Data Penelitian', rows: [], keys: [], headers: [] }];
+  const contentTypes = workbookSheets
+    .map(
+      (_sheet, index) =>
+        `<Override PartName="/xl/worksheets/sheet${index + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`,
+    )
+    .join('\n  ');
+  const sheetList = workbookSheets
+    .map(
+      (sheet, index) =>
+        `<sheet name="${sheetName(sheet.name)}" sheetId="${index + 1}" r:id="rId${index + 1}"/>`,
+    )
+    .join('\n    ');
+  const workbookRelationships = [
+    ...workbookSheets.map(
+      (_sheet, index) =>
+        `<Relationship Id="rId${index + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${index + 1}.xml"/>`,
+    ),
+    `<Relationship Id="rId${workbookSheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>`,
+  ].join('\n  ');
+  const worksheetFiles = workbookSheets.map((sheet, index) => ({
+    name: `xl/worksheets/sheet${index + 1}.xml`,
+    content: worksheetXml(sheet.rows, sheet.keys, sheet.headers ?? sheet.keys),
+  }));
+
   return zip([
     {
       name: '[Content_Types].xml',
@@ -189,7 +237,7 @@ export function createWorkbook(
   <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
   <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
   <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
-  <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+  ${contentTypes}
 </Types>`,
     },
     {
@@ -226,7 +274,7 @@ export function createWorkbook(
     <workbookView activeTab="0"/>
   </workbookViews>
   <sheets>
-    <sheet name="Data Penelitian" sheetId="1" r:id="rId1"/>
+    ${sheetList}
   </sheets>
 </workbook>`,
     },
@@ -234,8 +282,7 @@ export function createWorkbook(
       name: 'xl/_rels/workbook.xml.rels',
       content: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
-  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+  ${workbookRelationships}
 </Relationships>`,
     },
     {
@@ -278,9 +325,6 @@ export function createWorkbook(
   </cellStyles>
 </styleSheet>`,
     },
-    {
-      name: 'xl/worksheets/sheet1.xml',
-      content: worksheetXml(rows, keys, headers),
-    },
+    ...worksheetFiles,
   ]);
 }

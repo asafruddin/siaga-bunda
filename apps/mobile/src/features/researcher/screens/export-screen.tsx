@@ -14,13 +14,13 @@ const datasetTypes = [
     value: 'full_dataset',
     icon: 'table-large',
     title: 'Dataset lengkap',
-    description: 'Profil anonim, progres video, pretest, dan posttest',
+    description: 'Identitas responden, profil, progres, tes, dan jawaban',
   },
   {
     value: 'respondent_data',
     icon: 'account-group-outline',
     title: 'Data responden',
-    description: 'Kode responden dan tanggal pendaftaran',
+    description: 'Nama, kontak, alamat, dan profil kehamilan',
   },
   {
     value: 'video_progress',
@@ -214,7 +214,8 @@ export function ExportScreen() {
         </View>
         <Text style={s.pageTitle}>Ekspor Data</Text>
         <Text style={s.pageSubtitle}>
-          Pilih isi dan filter data sebelum membuat file Excel.
+          Pilih isi dan filter data sebelum membuat file Excel berisi data
+          responden penelitian.
         </Text>
       </View>
 
@@ -375,10 +376,10 @@ export function ExportScreen() {
           size={20}
         />
         <View style={{ flex: 1 }}>
-          <Text style={s.securityNoteTitle}>Privasi data terjaga</Text>
+          <Text style={s.securityNoteTitle}>Data sensitif peneliti</Text>
           <Text style={s.securityNoteText}>
-            File menggunakan kode responden anonim. Aktivitas ekspor dicatat
-            dalam audit penelitian.
+            File dapat berisi nama, kontak, dan alamat responden. Simpan hanya
+            untuk kebutuhan peneliti; aktivitas ekspor dicatat dalam audit.
           </Text>
         </View>
       </View>

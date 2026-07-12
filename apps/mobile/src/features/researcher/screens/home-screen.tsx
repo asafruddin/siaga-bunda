@@ -113,7 +113,7 @@ export function ResearcherHome() {
         />
       ),
       label: 'Ekspor Data',
-      description: 'Unduh dataset penelitian dalam format Excel',
+      description: 'Simpan data responden dan hasil penelitian ke Excel',
       path: '/researcher/export',
       tone: '#ECEFF7',
     },
