@@ -16,7 +16,10 @@ export function VideoEntryScreen() {
     const status = q.data?.progress?.status as VideoStatus | undefined;
     const isLastVideo = q.data?.is_last_video ?? false;
     if (!status) return;
-    if (status === 'completed' && !isLastVideo) {
+    if (
+      status === 'waiting_posttest' ||
+      (status === 'completed' && !isLastVideo)
+    ) {
       router.replace('/respondent/dashboard' as never);
       return;
     }
@@ -27,9 +30,7 @@ export function VideoEntryScreen() {
           ? 'video-player'
           : status === 'posttest_available'
             ? 'posttest-intro'
-            : status === 'completed'
-              ? 'posttest-completed'
-              : 'video-completed';
+            : 'posttest-completed';
     router.replace(`/respondent/videos/${id}/${path}` as never);
   }, [id, q.data]);
   if (q.error)

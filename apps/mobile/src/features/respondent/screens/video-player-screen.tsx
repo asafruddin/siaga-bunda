@@ -39,9 +39,10 @@ export function VideoPlayerScreen() {
   return (
     <VideoPlayer
       video={q.data}
-      onDone={async () => {
-        await qc.invalidateQueries();
-        router.replace(`/respondent/videos/${id}/video-completed` as never);
+      onDone={() => {
+        router.replace('/respondent/dashboard' as never);
+        void qc.invalidateQueries({ queryKey: ['videos'] });
+        void qc.invalidateQueries({ queryKey: ['profile'] });
       }}
     />
   );

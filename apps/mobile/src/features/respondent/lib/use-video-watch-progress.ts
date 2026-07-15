@@ -110,9 +110,15 @@ export function useVideoWatchProgress({
     currentTimeRef.current = startAt;
     last.current = startAt;
 
-    post(`/videos/${video.id}/start`).catch((e) =>
-      Alert.alert('Video belum dapat dimulai', e.message),
-    );
+    const canStart =
+      video.progress.status === 'video_available' ||
+      video.progress.status === 'video_in_progress';
+    if (canStart) {
+      post(`/videos/${video.id}/start`).catch((e) => {
+        if (!aliveRef.current) return;
+        Alert.alert('Video belum dapat dimulai', e.message);
+      });
+    }
 
     const sub = player.addListener('timeUpdate', ({ currentTime: time }) => {
       if (!aliveRef.current) return;
@@ -156,7 +162,14 @@ export function useVideoWatchProgress({
       }
       saveProgress().catch(() => {});
     };
-  }, [player, saveProgress, startAt, video.duration_seconds, video.id]);
+  }, [
+    player,
+    saveProgress,
+    startAt,
+    video.duration_seconds,
+    video.id,
+    video.progress.status,
+  ]);
 
   useEffect(() => {
     const timer = setInterval(() => {

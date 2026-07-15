@@ -599,8 +599,7 @@ app.post('/videos/:id/progress', auth, async (c) => {
   );
   if (
     !allowVideoSkip &&
-    parsed.data.maxWatchedSecond >
-      Number(p.max_watched_seconds) + elapsed + 5
+    parsed.data.maxWatchedSecond > Number(p.max_watched_seconds) + elapsed + 5
   )
     return fail(
       c,
